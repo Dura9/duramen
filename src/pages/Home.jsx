@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../hooks/useTheme'
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -39,6 +40,7 @@ function getStreakMessage(streak) {
 
 export default function Home() {
   const { user, profile, refreshProfile } = useAuth()
+  const { dark, toggle: toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [weekSessions, setWeekSessions] = useState([])
   const [todayDone, setTodayDone] = useState(false)
@@ -138,12 +140,21 @@ export default function Home() {
               {LEVEL_LABELS[profile.level] || 'Débutant'}
             </span>
           </div>
-          <button
-            onClick={() => supabase.auth.signOut()}
-            style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent', flexShrink: 0 }}
-          >
-            <i className="ti ti-logout"></i>
-          </button>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button
+              onClick={toggleTheme}
+              style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent' }}
+              title={dark ? 'Mode clair' : 'Mode sombre'}
+            >
+              <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`}></i>
+            </button>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent' }}
+            >
+              <i className="ti ti-logout"></i>
+            </button>
+          </div>
         </div>
 
         {/* Barre XP */}

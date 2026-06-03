@@ -20,6 +20,26 @@
   --font-display: 'Playfair Display', serif;
   --font-body: 'DM Sans', sans-serif;
   --nav-height: 72px;
+  --nav-bg: rgba(250,247,242,0.95);
+}
+
+/* ── MODE SOMBRE ───────────────────────────────────────────────────────── */
+.dark {
+  --primary: #5A9E8F;
+  --primary-light: #1a2e2a;
+  --primary-dark: #4a8070;
+  --accent: #D4A855;
+  --accent-light: #2a2210;
+  --bg: #111714;
+  --bg-card: #1C2420;
+  --text: #E8F0EC;
+  --text-muted: #7A9A8E;
+  --border: #2A3830;
+  --danger: #e05c4a;
+  --success: #4AC87A;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --nav-bg: rgba(17,23,20,0.95);
 }
 
 html { font-size: 16px; -webkit-text-size-adjust: 100%; }

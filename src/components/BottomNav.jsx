@@ -15,7 +15,7 @@ export default function BottomNav() {
     <nav style={{
       position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
       width: '100%', maxWidth: 480,
-      background: 'rgba(250,247,242,0.95)',
+      background: 'var(--nav-bg)',
       backdropFilter: 'blur(12px)',
       borderTop: '1px solid var(--border)',
       display: 'flex',
