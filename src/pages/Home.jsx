@@ -3,32 +3,38 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
+const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
-const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
+const QUOTES = [
+  "La régularité bat la perfection. Chaque séance compte.",
+  "Le contrôle se construit jour après jour, pas en une nuit.",
+  "Ce que tu fais aujourd'hui définit qui tu seras demain.",
+  "La discipline est la forme la plus haute de l'amour propre.",
+  "Un petit progrès chaque jour mène à de grands résultats.",
+  "La maîtrise de soi commence par un choix quotidien.",
+  "Tu es plus fort que tu ne le crois.",
+]
 
-function getStreakMessage(streak) {
-  if (streak === 0) return 'Commence aujourd\'hui !'
-  if (streak < 3) return 'Bon départ !'
-  if (streak < 7) return 'Continue comme ça !'
-  if (streak < 14) return 'Belle régularité !'
-  if (streak < 30) return 'Impressionnant !'
-  return 'Tu es une inspiration !'
+function getGreeting(firstName) {
+  const h = new Date().getHours()
+  if (h < 12) return `Bonjour, ${firstName} ☀️`
+  if (h < 18) return `Bon après-midi, ${firstName} 👋`
+  return `Bonsoir, ${firstName} 🌙`
 }
 
-function XPBar({ xp }) {
-  const xpPerLevel = 200
-  const current = xp % xpPerLevel
-  const lvl = Math.floor(xp / xpPerLevel) + 1
-  return (
-    <div style={{ background: 'var(--primary-light)', borderRadius: 8, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-      <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--primary)', minWidth: 32 }}>Niv. {lvl}</span>
-      <div style={{ flex: 1, height: 6, background: 'rgba(74,124,111,0.2)', borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: 'var(--primary)', borderRadius: 3, width: `${(current / xpPerLevel) * 100}%`, transition: 'width 0.5s ease' }}></div>
-      </div>
-      <span style={{ fontSize: 11, color: 'var(--primary)', minWidth: 50, textAlign: 'right' }}>{current}/{xpPerLevel} XP</span>
-    </div>
-  )
+function getTodayQuote() {
+  const day = new Date().getDay()
+  return QUOTES[day % QUOTES.length]
+}
+
+function getStreakMessage(streak) {
+  if (streak === 0) return { msg: 'Lance ta première séance', sub: 'Le premier pas est le plus important' }
+  if (streak < 3) return { msg: 'Bon départ !', sub: 'Continue sur ta lancée' }
+  if (streak < 7) return { msg: 'Belle régularité !', sub: `${streak} jours sans faillir` }
+  if (streak < 14) return { msg: 'Tu es en feu 🔥', sub: `${streak} jours consécutifs` }
+  if (streak < 30) return { msg: 'Impressionnant !', sub: `${streak} jours — tu es dans le top 10%` }
+  return { msg: 'Légendaire 🏆', sub: `${streak} jours — tu es une inspiration` }
 }
 
 export default function Home() {
@@ -49,18 +55,14 @@ export default function Home() {
     const monday = new Date(today)
     monday.setDate(today.getDate() - ((today.getDay() + 6) % 7))
     monday.setHours(0, 0, 0, 0)
-
     const { data } = await supabase
-      .from('sessions')
-      .select('completed_at')
+      .from('sessions').select('completed_at')
       .eq('user_id', user.id)
       .gte('completed_at', monday.toISOString())
-
     if (data) {
-      const daysWithSession = data.map(s => new Date(s.completed_at).getDay())
-      setWeekSessions(daysWithSession)
-      const todayDay = new Date().getDay()
-      setTodayDone(daysWithSession.includes(todayDay))
+      const days = data.map(s => new Date(s.completed_at).getDay())
+      setWeekSessions(days)
+      setTodayDone(days.includes(new Date().getDay()))
     }
   }
 
@@ -69,14 +71,13 @@ export default function Home() {
     const today = new Date().toDateString()
     const lastDate = profile.streak_last_date ? new Date(profile.streak_last_date).toDateString() : null
     if (lastDate === today) return
-
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
-    const isYesterday = lastDate === yesterday.toDateString()
-
-    if (!isYesterday && lastDate !== today && profile.streak > 0) {
-      await supabase.from('profiles').update({ streak: 0 }).eq('id', user.id)
-      await refreshProfile()
+    if (!profile.streak_last_date || (lastDate !== yesterday.toDateString() && lastDate !== today)) {
+      if (profile.streak > 0) {
+        await supabase.from('profiles').update({ streak: 0 }).eq('id', user.id)
+        await refreshProfile()
+      }
     }
   }
 
@@ -92,107 +93,223 @@ export default function Home() {
 
   if (!profile) return null
 
+  const streak = profile.streak || 0
+  const { msg: streakMsg, sub: streakSub } = getStreakMessage(streak)
+  const xpPerLevel = 200
+  const xpCurrent = (profile.xp || 0) % xpPerLevel
+  const xpLevel = Math.floor((profile.xp || 0) / xpPerLevel) + 1
+  const xpPct = (xpCurrent / xpPerLevel) * 100
+
   return (
-    <div className="page fade-in">
-      <div className="page-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <div className="page fade-in" style={{ paddingTop: 0 }}>
+
+      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(160deg, var(--primary) 0%, #3a6359 100%)',
+        borderRadius: '0 0 32px 32px',
+        padding: '56px 24px 28px',
+        marginBottom: 24,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Cercle décoratif */}
+        <div style={{
+          position: 'absolute', top: -40, right: -40,
+          width: 160, height: 160, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.06)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', top: 20, right: 20,
+          width: 80, height: 80, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.04)',
+          pointerEvents: 'none',
+        }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
           <div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 2 }}>Bonjour,</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text)', fontWeight: 500 }}>{profile.first_name} 👋</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>
+              Semaine {profile.program_week} · Phase {profile.program_phase}
+            </div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, lineHeight: 1.2 }}>
+              {getGreeting(profile.first_name)}
+            </h1>
+            <span style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)', padding: '3px 10px', borderRadius: 20, fontWeight: 500 }}>
+              {LEVEL_LABELS[profile.level] || 'Débutant'}
+            </span>
           </div>
-          <button onClick={() => supabase.auth.signOut()} style={{ color: 'var(--text-muted)', fontSize: 12, padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8 }}>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent', flexShrink: 0 }}
+          >
             <i className="ti ti-logout"></i>
           </button>
         </div>
-        <div style={{ marginTop: 4 }}>
-          <span className="badge badge-green">{LEVEL_LABELS[profile.level] || 'Débutant'}</span>
-          <span style={{ margin: '0 8px', color: 'var(--border)' }}>·</span>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Semaine {profile.program_week} · Phase {profile.program_phase}</span>
+
+        {/* Barre XP */}
+        <div style={{ marginTop: 20, position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>
+            <span>Niveau {xpLevel}</span>
+            <span>{xpCurrent} / {xpPerLevel} XP</span>
+          </div>
+          <div style={{ height: 5, background: 'rgba(255,255,255,0.2)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', background: '#fff', borderRadius: 4, width: `${xpPct}%`, transition: 'width 0.6s ease' }} />
+          </div>
         </div>
       </div>
 
-      <div style={{ paddingTop: 20 }}>
-        <XPBar xp={profile.xp || 0} />
+      <div style={{ padding: '0 20px' }}>
 
-        <div style={{ background: 'var(--primary)', borderRadius: 'var(--radius)', padding: '20px 24px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ textAlign: 'center', minWidth: 64 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 56, color: '#fff', lineHeight: 1 }}>{profile.streak || 0}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: 2 }}>jours</div>
+        {/* ── STREAK ───────────────────────────────────────────────────── */}
+        <div style={{
+          background: streak >= 7
+            ? 'linear-gradient(135deg, #e85c0d22, #ffd70022)'
+            : 'var(--bg-card)',
+          border: `1.5px solid ${streak >= 7 ? '#e85c0d40' : 'var(--border)'}`,
+          borderRadius: 20,
+          padding: '18px 20px',
+          marginBottom: 16,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+        }}>
+          <div style={{
+            width: 60, height: 60, borderRadius: 16,
+            background: streak > 0 ? '#e85c0d15' : 'var(--primary-light)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 30, flexShrink: 0,
+          }}>
+            {streak === 0 ? '🌱' : streak < 7 ? '🔥' : streak < 14 ? '⚡' : '🏆'}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>Série en cours</div>
-            <div style={{ fontSize: 17, color: '#fff', fontWeight: 500 }}>{getStreakMessage(profile.streak || 0)}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>
-              {profile.streak > 0 ? `🔥 ${profile.streak} jours consécutifs` : 'Chaque jour compte'}
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 2 }}>Série en cours</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', fontWeight: 500 }}>
+              {streak} jour{streak > 1 ? 's' : ''}
             </div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{streakMsg} — {streakSub}</div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
-          {[
-            { val: `+${Math.min((profile.program_week - 1) * 12, 80)}%`, lbl: 'Progression' },
-            { val: profile.program_week || 1, lbl: 'Semaine' },
-            { val: profile.xp || 0, lbl: 'XP total' },
-          ].map((s, i) => (
-            <div key={i} className="card" style={{ textAlign: 'center', padding: '14px 8px' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--primary)', fontWeight: 500 }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{s.lbl}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="section-label">Cette semaine</div>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 24 }}>
-          {weekDays.map((d, i) => (
-            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: d.done ? 'var(--primary)' : d.isToday ? 'var(--primary-light)' : 'var(--bg-card)',
-                border: d.isToday ? '2px solid var(--primary)' : '1px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: d.done ? 14 : 12,
-                color: d.done ? '#fff' : d.isToday ? 'var(--primary)' : 'var(--text-muted)',
-                fontWeight: d.isToday ? 600 : 400,
-              }}>
-                {d.done ? <i className="ti ti-check"></i> : d.label}
+        {/* ── SEMAINE ──────────────────────────────────────────────────── */}
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <span className="section-label" style={{ margin: 0 }}>Cette semaine</span>
+            <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>
+              {weekSessions.length} séance{weekSessions.length > 1 ? 's' : ''}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {weekDays.map((d, i) => (
+              <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                <div style={{
+                  width: '100%', aspectRatio: '1', maxWidth: 40,
+                  borderRadius: 10,
+                  background: d.done ? 'var(--primary)' : d.isToday ? 'var(--primary-light)' : 'var(--bg)',
+                  border: `1.5px solid ${d.done ? 'var(--primary)' : d.isToday ? 'var(--primary)' : 'var(--border)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13,
+                  color: d.done ? '#fff' : d.isToday ? 'var(--primary)' : 'var(--text-muted)',
+                  fontWeight: d.isToday ? 700 : 400,
+                }}>
+                  {d.done ? '✓' : d.label}
+                </div>
               </div>
-              <span style={{ fontSize: 9, color: 'var(--text-muted)' }}>{d.label}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div style={{ background: 'var(--accent-light)', border: '1px solid #e8c97a', borderRadius: 'var(--radius)', padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ fontSize: 24 }}>📅</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#7a5c00' }}>Check-in hebdomadaire</div>
-            <div style={{ fontSize: 12, color: '#9a7a20', marginTop: 2 }}>Alex vous attend pour votre bilan</div>
+        {/* ── EXERCICE DU JOUR ─────────────────────────────────────────── */}
+        <div className="section-label">Exercice du jour</div>
+        <div
+          onClick={() => !todayDone && navigate('/exercises')}
+          style={{
+            background: todayDone
+              ? 'var(--bg-card)'
+              : 'linear-gradient(135deg, var(--primary) 0%, #3a6359 100%)',
+            borderRadius: 20,
+            padding: '20px 22px',
+            marginBottom: 16,
+            cursor: todayDone ? 'default' : 'pointer',
+            border: todayDone ? '1.5px solid var(--border)' : 'none',
+            position: 'relative',
+            overflow: 'hidden',
+            transition: 'transform 0.15s',
+          }}
+          onTouchStart={e => { if (!todayDone) e.currentTarget.style.transform = 'scale(0.98)' }}
+          onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        >
+          {!todayDone && (
+            <div style={{
+              position: 'absolute', bottom: -20, right: -20,
+              width: 100, height: 100, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.07)',
+              pointerEvents: 'none',
+            }} />
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+              background: todayDone ? 'var(--primary-light)' : 'rgba(255,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 24,
+            }}>
+              {todayDone ? '✅' : '🌬️'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: todayDone ? 'var(--text)' : '#fff', marginBottom: 4 }}>
+                Respiration diaphragmatique
+              </div>
+              <div style={{ fontSize: 13, color: todayDone ? 'var(--text-muted)' : 'rgba(255,255,255,0.7)' }}>
+                8 min · Conscience corporelle
+              </div>
+            </div>
+            {todayDone ? (
+              <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600, flexShrink: 0 }}>Fait ✓</span>
+            ) : (
+              <div style={{
+                background: 'rgba(255,255,255,0.2)', borderRadius: 10,
+                width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <i className="ti ti-arrow-right" style={{ color: '#fff', fontSize: 16 }}></i>
+              </div>
+            )}
           </div>
-          <button onClick={() => navigate('/coach', { state: { checkin: true } })} style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', flexShrink: 0 }}>
+        </div>
+
+        {/* ── CHECK-IN HEBDO ───────────────────────────────────────────── */}
+        <div style={{
+          background: 'var(--accent-light)',
+          border: '1.5px solid #e8c97a',
+          borderRadius: 16,
+          padding: '14px 18px',
+          marginBottom: 20,
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ fontSize: 22 }}>📅</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00' }}>Check-in hebdomadaire</div>
+            <div style={{ fontSize: 12, color: '#9a7a20', marginTop: 1 }}>Alex t'attend pour ton bilan</div>
+          </div>
+          <button
+            onClick={() => navigate('/coach', { state: { checkin: true } })}
+            style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+          >
             Démarrer
           </button>
         </div>
 
-        <div className="section-label">Exercice du jour</div>
-        <div
-          className="card"
-          style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', opacity: todayDone ? 0.7 : 1 }}
-          onClick={() => navigate('/exercises')}
-        >
-          <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <i className="ti ti-wind" style={{ fontSize: 22, color: 'var(--primary)' }}></i>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 500 }}>Respiration diaphragmatique</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>8 min · Conscience corporelle</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <span className="badge badge-green" style={{ display: 'block', marginBottom: 6 }}>Niv. 1</span>
-            {todayDone
-              ? <span style={{ fontSize: 12, color: 'var(--primary)' }}>✓ Fait</span>
-              : <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }}>Démarrer</button>
-            }
-          </div>
+        {/* ── CITATION DU JOUR ─────────────────────────────────────────── */}
+        <div style={{
+          textAlign: 'center',
+          padding: '16px 20px 8px',
+          marginBottom: 8,
+        }}>
+          <div style={{ fontSize: 18, color: 'var(--border)', marginBottom: 8, lineHeight: 1 }}>"</div>
+          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, fontStyle: 'italic' }}>
+            {getTodayQuote()}
+          </p>
         </div>
+
       </div>
     </div>
   )
