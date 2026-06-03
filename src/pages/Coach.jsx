@@ -114,7 +114,7 @@ export default function Coach() {
           'X-Title': 'Duramen',
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          model: 'google/gemma-4-31b-it:free',
           messages: [
             { role: 'system', content: buildSystemPrompt(profile) },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
