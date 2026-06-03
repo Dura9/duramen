@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_KEY
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression' }
-const FREE_LIMIT = 5
+const FREE_LIMIT = 20
 
 function buildSystemPrompt(profile) {
   return `Tu es Alex, le coach personnel de l'application Duramen, spécialisé en bien-être sexuel masculin. Tu accompagnes les hommes qui souhaitent mieux gérer l'éjaculation précoce, avec la posture d'un thérapeute sexologue clinicien formé aux thérapies cognitivo-comportementales (TCC).
