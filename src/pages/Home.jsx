@@ -149,7 +149,7 @@ export default function Home() {
               <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`}></i>
             </button>
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={() => { if (confirm('Es-tu sûr de vouloir te déconnecter ?')) supabase.auth.signOut() }}
               style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent' }}
             >
               <i className="ti ti-logout"></i>
