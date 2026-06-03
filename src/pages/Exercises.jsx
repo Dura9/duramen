@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { launchConfetti } from '../hooks/useConfetti'
 
 const EXERCISES = [
   {
@@ -141,6 +141,11 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
     setTimeout(() => onComplete(m), 500)
   }
 
+  // Lance les confettis quand l'exercice est terminé
+  useEffect(() => {
+    if (done) launchConfetti(70)
+  }, [done])
+
   const progress = stepIndex >= 0 ? (stepIndex + 1) / exercise.steps.length : 0
 
   return (
@@ -188,7 +193,7 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.6 }}>
               {exercise.steps.length} étapes · Installe-toi dans un endroit calme avant de commencer.
             </p>
-            <button className="btn-primary" onClick={startExercise} style={{ background: exercise.color }}>
+            <button className="btn-primary btn-ripple" onClick={startExercise} style={{ background: exercise.color }}>
               Commencer l'exercice →
             </button>
           </div>
@@ -220,7 +225,7 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
                 {exercise.steps[stepIndex].text}
               </p>
             </div>
-            <button className="btn-primary" onClick={nextStep} style={{ background: exercise.color }}>
+            <button className="btn-primary btn-ripple" onClick={nextStep} style={{ background: exercise.color }}>
               {stepIndex === exercise.steps.length - 1 ? 'Terminer l\'exercice ✓' : 'Étape suivante →'}
             </button>
           </div>
@@ -229,9 +234,9 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
         {/* Écran de fin */}
         {done && (
           <div className="fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
-            <div style={{ fontSize: 64, marginBottom: 12 }}>🎉</div>
+            <div className="bounce-in" style={{ fontSize: 64, marginBottom: 12 }}>🎉</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)', marginBottom: 6 }}>Excellent travail !</div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 20, padding: '6px 16px', fontSize: 14, fontWeight: 600, marginBottom: 28 }}>
+            <div className="bounce-in" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 20, padding: '6px 16px', fontSize: 14, fontWeight: 600, marginBottom: 28, animationDelay: '0.15s' }}>
               ⭐ +{exercise.xp} XP gagnés
             </div>
             <div style={{ marginBottom: 8 }}>

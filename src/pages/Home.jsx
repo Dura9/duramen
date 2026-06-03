@@ -188,7 +188,7 @@ export default function Home() {
             width: 60, height: 60, borderRadius: 16,
             background: streak > 0 ? '#e85c0d15' : 'var(--primary-light)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 30, flexShrink: 0,
+            fontSize: 30, flexShrink: 0, transition: 'transform 0.3s',
           }}>
             {streak === 0 ? '🌱' : streak < 7 ? '🔥' : streak < 14 ? '⚡' : '🏆'}
           </div>
@@ -303,7 +303,8 @@ export default function Home() {
           </div>
           <button
             onClick={() => navigate('/coach', { state: { checkin: true } })}
-            style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+            className="btn-ripple"
+          style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
           >
             Démarrer
           </button>
