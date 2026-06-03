@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -118,6 +118,27 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
   const [mood, setMood] = useState(null)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    if (!running || timer <= 0) return
+    timerRef.current = setInterval(() => {
+      setTimer(t => {
+        if (t <= 1) {
+          clearInterval(timerRef.current)
+          return 0
+        }
+        return t - 1
+      })
+    }, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [running, stepIndex])
+
+  useEffect(() => {
+    if (running && timer === 0 && stepIndex >= 0) {
+      setTimeout(() => nextStep(), 800)
+    }
+  }, [timer])
 
   function startExercise() {
     setStepIndex(0)
@@ -126,6 +147,7 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
   }
 
   function nextStep() {
+    clearInterval(timerRef.current)
     const next = stepIndex + 1
     if (next >= exercise.steps.length) {
       setRunning(false)
@@ -171,8 +193,8 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
               ))}
             </div>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 28, color: '#fff', fontFamily: 'var(--font-display)' }}>
-                {timer > 0 ? timer : '✓'}
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: timer === 0 ? 'var(--accent)' : 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: timer > 99 ? 20 : 28, color: '#fff', fontFamily: 'var(--font-display)', transition: 'background 0.3s' }}>
+                {timer === 0 ? '✓' : timer}
               </div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>Étape {stepIndex + 1}/{exercise.steps.length}</div>
               <p style={{ fontSize: 16, color: 'var(--text)', lineHeight: 1.6 }}>{exercise.steps[stepIndex].text}</p>
@@ -209,6 +231,9 @@ export default function Exercises() {
   const { user, profile, refreshProfile } = useAuth()
   const navigate = useNavigate()
   const [activeExercise, setActiveExercise] = useState(null)
+  const [phaseUnlocked, setPhaseUnlocked] = useState(null)
+
+  const PHASE_UNLOCK_THRESHOLD = { 1: 5, 2: 5 }
 
   async function handleComplete(mood) {
     if (!user || !activeExercise) return
@@ -230,14 +255,32 @@ export default function Exercises() {
 
     const newStreak = isToday ? profile.streak : isYesterday ? (profile.streak + 1) : 1
 
+    const currentPhase = profile.program_phase || 1
+    const phaseExerciseIds = EXERCISES.filter(e => e.phase === currentPhase).map(e => e.id)
+    const { count } = await supabase
+      .from('sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .in('exercise_id', phaseExerciseIds)
+
+    const totalPhaseSessions = (count || 0) + 1
+    const threshold = PHASE_UNLOCK_THRESHOLD[currentPhase]
+    const shouldAdvancePhase = threshold && totalPhaseSessions >= threshold && currentPhase < 3
+
+    const newWeek = Math.min(8, Math.floor(totalPhaseSessions / 2) + (currentPhase - 1) * 2 + 1)
+
     await supabase.from('profiles').update({
       xp: (profile.xp || 0) + ex.xp,
       streak: newStreak,
       streak_last_date: new Date().toISOString(),
+      ...(shouldAdvancePhase && { program_phase: currentPhase + 1, program_week: (currentPhase) * 2 + 1 }),
     }).eq('id', user.id)
 
     await refreshProfile()
     setActiveExercise(null)
+    if (shouldAdvancePhase) {
+      setPhaseUnlocked(currentPhase + 1)
+    }
   }
 
   const currentPhase = profile?.program_phase || 1
@@ -284,6 +327,15 @@ export default function Exercises() {
           </div>
         )
       })}
+
+      {phaseUnlocked && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 200, background: 'var(--primary)', color: '#fff', borderRadius: 16, padding: '16px 24px', boxShadow: '0 8px 24px rgba(74,124,111,0.4)', textAlign: 'center', maxWidth: 320, animation: 'fadeIn 0.3s ease' }}>
+          <div style={{ fontSize: 28, marginBottom: 6 }}>🎉</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, marginBottom: 4 }}>Phase {phaseUnlocked} débloquée !</div>
+          <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 12 }}>De nouveaux exercices sont disponibles.</div>
+          <button onClick={() => setPhaseUnlocked(null)} style={{ background: 'rgba(255,255,255,0.25)', border: 'none', color: '#fff', borderRadius: 8, padding: '6px 16px', fontSize: 13, cursor: 'pointer' }}>Super !</button>
+        </div>
+      )}
 
       {activeExercise && (
         <ExerciseModal

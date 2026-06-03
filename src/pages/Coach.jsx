@@ -114,7 +114,7 @@ export default function Coach() {
           'X-Title': 'Duramen',
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-exp:free',
+          model: 'meta-llama/llama-3.3-70b-instruct:free',
           messages: [
             { role: 'system', content: buildSystemPrompt(profile) },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
@@ -157,7 +157,7 @@ export default function Coach() {
   const remaining = FREE_LIMIT - msgCount
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(70px + env(safe-area-inset-bottom, 0px))' }}>
       <div style={{ padding: '52px 20px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🧠</div>
