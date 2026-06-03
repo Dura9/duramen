@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
-const OPENROUTER_KEY = import.meta.env.VITE_OPENROUTER_KEY
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression' }
 const FREE_LIMIT = 20
@@ -105,14 +104,9 @@ export default function Coach() {
     localStorage.setItem(`duramen_msg_${user.id}_${today}`, newCount)
 
     try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENROUTER_KEY}`,
-          'HTTP-Referer': window.location.origin,
-          'X-Title': 'Duramen',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'google/gemma-4-31b-it:free',
           messages: [
