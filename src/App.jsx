@@ -11,6 +11,7 @@ import Coach from './pages/Coach'
 import Progress from './pages/Progress'
 import Account from './pages/Account'
 import BottomNav from './components/BottomNav'
+import PushPrompt from './components/PushPrompt'
 
 function ResetPasswordScreen() {
   const [password, setPassword] = useState('')
@@ -119,6 +120,7 @@ function AppRoutes() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
+      <PushPrompt />
     </>
   )
 }
