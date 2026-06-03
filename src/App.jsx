@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
+import { supabase } from './lib/supabase'
 import Onboarding from './pages/Onboarding'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
@@ -8,8 +10,80 @@ import Coach from './pages/Coach'
 import Progress from './pages/Progress'
 import BottomNav from './components/BottomNav'
 
+function ResetPasswordScreen() {
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [done, setDone] = useState(false)
+
+  async function handleReset(e) {
+    e.preventDefault()
+    if (password !== confirm) return setError('Les mots de passe ne correspondent pas.')
+    if (password.length < 6) return setError('Minimum 6 caractères.')
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) setError(error.message)
+    else setDone(true)
+    setLoading(false)
+  }
+
+  if (done) return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)', textAlign: 'center' }}>
+      <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)', marginBottom: 8 }}>Mot de passe modifié</div>
+      <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 32 }}>Tu peux maintenant utiliser ton nouveau mot de passe.</p>
+      <button className="btn-primary" onClick={() => window.location.href = '/'}>Aller sur l'app →</button>
+    </div>
+  )
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)' }}>
+      <div style={{ marginBottom: 40, textAlign: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 36, color: 'var(--primary)', fontWeight: 400 }}>Duramen</div>
+        <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 6 }}>Choisir un nouveau mot de passe</div>
+      </div>
+      <div className="card" style={{ padding: 28 }}>
+        <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>Nouveau mot de passe</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} placeholder="Minimum 6 caractères"
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: 15, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>Confirmer le mot de passe</label>
+            <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={6} placeholder="••••••••"
+              style={{ width: '100%', padding: '12px 14px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: 15, background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} />
+          </div>
+          {error && <div style={{ background: '#fde8e8', color: 'var(--danger)', borderRadius: 8, padding: '10px 14px', fontSize: 13 }}>{error}</div>}
+          <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: 8 }}>
+            {loading ? <span className="spinner"></span> : 'Enregistrer le nouveau mot de passe'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function AppRoutes() {
   const { user, profile, loading } = useAuth()
+  const [isPasswordReset, setIsPasswordReset] = useState(false)
+
+  useEffect(() => {
+    // Détecter si l'URL contient un token de reset Supabase
+    const hash = window.location.hash
+    if (hash.includes('type=recovery')) {
+      setIsPasswordReset(true)
+    }
+    // Écouter l'événement Supabase PASSWORD_RECOVERY
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') setIsPasswordReset(true)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (isPasswordReset) return <ResetPasswordScreen />
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 16 }}>
