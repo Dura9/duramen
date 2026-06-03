@@ -8,6 +8,7 @@ const TABS = [
   { path: '/exercises',  icon: 'ti-barbell',         label: 'Exercices' },
   { path: '/coach',      icon: 'ti-message-circle',  label: 'Coach'     },
   { path: '/progress',   icon: 'ti-chart-bar',       label: 'Progrès'   },
+  { path: '/account',    icon: 'ti-user-circle',     label: 'Compte'    },
 ]
 
 export default function BottomNav() {

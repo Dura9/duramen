@@ -140,21 +140,13 @@ export default function Home() {
               {LEVEL_LABELS[profile.level] || 'Débutant'}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <button
-              onClick={toggleTheme}
-              style={{ color: 'rgba(255,255,255,0.7)', fontSize: 16, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent' }}
-              title={dark ? 'Mode clair' : 'Mode sombre'}
-            >
-              <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`}></i>
-            </button>
-            <button
-              onClick={() => { if (confirm('Es-tu sûr de vouloir te déconnecter ?')) supabase.auth.signOut() }}
-              style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent' }}
-            >
-              <i className="ti ti-logout"></i>
-            </button>
-          </div>
+          <button
+            onClick={toggleTheme}
+            style={{ color: 'rgba(255,255,255,0.7)', fontSize: 18, padding: '7px 10px', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, background: 'transparent', flexShrink: 0 }}
+            title={dark ? 'Mode clair' : 'Mode sombre'}
+          >
+            <i className={`ti ${dark ? 'ti-sun' : 'ti-moon'}`}></i>
+          </button>
         </div>
 
         {/* Barre XP */}

@@ -9,6 +9,7 @@ import Home from './pages/Home'
 import Exercises from './pages/Exercises'
 import Coach from './pages/Coach'
 import Progress from './pages/Progress'
+import Account from './pages/Account'
 import BottomNav from './components/BottomNav'
 
 function ResetPasswordScreen() {
@@ -114,6 +115,7 @@ function AppRoutes() {
         <Route path="/exercises" element={<Exercises />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/progress" element={<Progress />} />
+        <Route path="/account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
