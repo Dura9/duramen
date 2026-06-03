@@ -1,49 +1,43 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts'
 
 const BADGES = [
-  { id: 'first_session', icon: '🌱', title: 'Premier pas', desc: 'Première séance complétée', condition: (s, p) => s.length >= 1 },
-  { id: 'streak_3', icon: '🔥', title: '3 jours', desc: '3 jours consécutifs', condition: (s, p) => p.streak >= 3 },
-  { id: 'streak_7', icon: '⚡', title: '7 jours', desc: '7 jours consécutifs', condition: (s, p) => p.streak >= 7 },
-  { id: 'streak_30', icon: '💎', title: '1 mois', desc: '30 jours consécutifs', condition: (s, p) => p.streak >= 30 },
-  { id: 'sessions_10', icon: '💪', title: 'Assidu', desc: '10 séances complétées', condition: (s, p) => s.length >= 10 },
-  { id: 'sessions_20', icon: '🏆', title: 'Expert', desc: '20 séances complétées', condition: (s, p) => s.length >= 20 },
-  { id: 'kegel_5', icon: '🎯', title: 'Kegel Master', desc: '5 séances Kegel', condition: (s, p) => s.filter(x => x.exercise_id?.includes('kegel')).length >= 5 },
-  { id: 'xp_100', icon: '⭐', title: '100 XP', desc: '100 XP accumulés', condition: (s, p) => p.xp >= 100 },
+  { id: 'first_session', icon: '🌱', title: 'Premier pas',   desc: 'Première séance',          condition: (s, p) => s.length >= 1 },
+  { id: 'streak_3',      icon: '🔥', title: '3 jours',       desc: '3 jours consécutifs',       condition: (s, p) => p.streak >= 3 },
+  { id: 'streak_7',      icon: '⚡', title: '7 jours',       desc: '7 jours consécutifs',       condition: (s, p) => p.streak >= 7 },
+  { id: 'streak_30',     icon: '💎', title: '1 mois',        desc: '30 jours consécutifs',      condition: (s, p) => p.streak >= 30 },
+  { id: 'sessions_10',   icon: '💪', title: 'Assidu',        desc: '10 séances complétées',     condition: (s, p) => s.length >= 10 },
+  { id: 'sessions_20',   icon: '🏆', title: 'Expert',        desc: '20 séances complétées',     condition: (s, p) => s.length >= 20 },
+  { id: 'kegel_5',       icon: '🎯', title: 'Kegel Master',  desc: '5 séances Kegel',           condition: (s, p) => s.filter(x => x.exercise_id?.includes('kegel')).length >= 5 },
+  { id: 'xp_100',        icon: '⭐', title: '100 XP',        desc: '100 XP accumulés',          condition: (s, p) => p.xp >= 100 },
 ]
 
-const LEVEL_INFO = {
-  1: { label: 'Débutant', next: 'En éveil', progress: 25 },
-  2: { label: 'En éveil', next: 'En progression', progress: 50 },
-  3: { label: 'En progression', next: 'En contrôle', progress: 75 },
-  4: { label: 'En contrôle', next: 'Maître de soi', progress: 90 },
-  5: { label: 'Maître de soi', next: null, progress: 100 },
-}
+const PHASES = [
+  { n: 1, title: 'Conscience corporelle', weeks: 'Semaines 1–2', icon: '🧘', desc: 'Respiration, scan corporel, périnée' },
+  { n: 2, title: 'Renforcement',          weeks: 'Semaines 3–4', icon: '💪', desc: 'Kegel, contrôle musculaire, stop-start' },
+  { n: 3, title: 'Maîtrise active',       weeks: 'Semaines 5–6', icon: '🎯', desc: 'Squeeze, gestion de l\'excitation' },
+  { n: 4, title: 'Intégration',           weeks: 'Semaines 7–8', icon: '✨', desc: 'Consolidation, confiance, intimité' },
+]
 
-const MOOD_MAP = { '😐': 1, '😊': 2, '😄': 3 }
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
+const MOOD_MAP = { '😐': 1, '😊': 2, '😄': 3 }
 
 export default function Progress() {
   const { profile } = useAuth()
   const [sessions, setSessions] = useState([])
   const [weekData, setWeekData] = useState([])
 
-  useEffect(() => {
-    if (profile) fetchSessions()
-  }, [profile])
+  useEffect(() => { if (profile) fetchSessions() }, [profile])
 
   async function fetchSessions() {
     const { data } = await supabase
-      .from('sessions')
-      .select('*')
+      .from('sessions').select('*')
       .eq('user_id', profile.id)
       .order('completed_at', { ascending: false })
-
     if (data) {
       setSessions(data)
-
       const last7 = []
       for (let i = 6; i >= 0; i--) {
         const d = new Date()
@@ -51,13 +45,8 @@ export default function Progress() {
         const dayStr = d.toDateString()
         const daySessions = data.filter(s => new Date(s.completed_at).toDateString() === dayStr)
         const avgMood = daySessions.length > 0
-          ? daySessions.reduce((sum, s) => sum + (MOOD_MAP[s.mood] || 2), 0) / daySessions.length
-          : 0
-        last7.push({
-          day: DAYS_FR[d.getDay()],
-          séances: daySessions.length,
-          humeur: Math.round(avgMood * 10) / 10,
-        })
+          ? daySessions.reduce((sum, s) => sum + (MOOD_MAP[s.mood] || 2), 0) / daySessions.length : 0
+        last7.push({ day: DAYS_FR[d.getDay()], séances: daySessions.length, humeur: Math.round(avgMood * 10) / 10, isToday: i === 0 })
       }
       setWeekData(last7)
     }
@@ -65,113 +54,189 @@ export default function Progress() {
 
   if (!profile) return null
 
-  const levelInfo = LEVEL_INFO[profile.level] || LEVEL_INFO[1]
   const programProgress = Math.round(((profile.program_week - 1) / 8) * 100)
   const earnedBadges = BADGES.filter(b => b.condition(sessions, profile))
+  const xpPerLevel = 200
+  const xpLevel = Math.floor((profile.xp || 0) / xpPerLevel) + 1
+  const xpPct = ((profile.xp || 0) % xpPerLevel) / xpPerLevel * 100
+
+  const stats = [
+    { icon: '🔥', val: profile.streak || 0,  lbl: 'Jours streak',    color: '#e85c0d' },
+    { icon: '💪', val: sessions.length,       lbl: 'Séances',         color: 'var(--primary)' },
+    { icon: '⭐', val: profile.xp || 0,       lbl: 'XP total',        color: '#d4a855' },
+    { icon: '🏅', val: `${earnedBadges.length}/${BADGES.length}`, lbl: 'Badges', color: '#7c6f4a' },
+  ]
 
   return (
-    <div className="page fade-in">
-      <div className="page-header">
-        <div className="page-title">Mes progrès</div>
-        <div className="page-subtitle">Semaine {profile.program_week} sur 8</div>
-      </div>
+    <div className="page fade-in" style={{ paddingTop: 0 }}>
 
-      <div className="card" style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <div style={{ fontSize: 14, fontWeight: 500 }}>Programme global</div>
-          <div style={{ fontSize: 14, color: 'var(--primary)', fontWeight: 500 }}>{programProgress}%</div>
-        </div>
-        <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
-          <div style={{ height: '100%', background: 'var(--primary)', borderRadius: 4, width: `${programProgress}%`, transition: 'width 0.6s ease' }}></div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)' }}>
-          <span>Semaine 1</span><span>Semaine 8</span>
-        </div>
-      </div>
+      {/* ── HEADER ───────────────────────────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(160deg, var(--primary) 0%, #3a6359 100%)',
+        borderRadius: '0 0 32px 32px',
+        padding: '56px 24px 28px',
+        marginBottom: 24,
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>Programme · Semaine {profile.program_week} sur 8</div>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, marginBottom: 20 }}>Mes progrès</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10, marginBottom: 20 }}>
-        {[
-          { icon: 'ti-flame', val: profile.streak || 0, lbl: 'Jours consécutifs', color: '#e85c0d' },
-          { icon: 'ti-activity', val: sessions.length, lbl: 'Séances totales', color: 'var(--primary)' },
-          { icon: 'ti-star', val: profile.xp || 0, lbl: 'XP total', color: '#d4a855' },
-          { icon: 'ti-trophy', val: earnedBadges.length, lbl: 'Badges obtenus', color: '#7c6f4a' },
-        ].map((s, i) => (
-          <div key={i} className="card" style={{ textAlign: 'center', padding: '14px 10px' }}>
-            <i className={`ti ${s.icon}`} style={{ fontSize: 22, color: s.color, display: 'block', marginBottom: 6 }}></i>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 500, color: 'var(--text)' }}>{s.val}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.lbl}</div>
+        {/* Barre programme */}
+        <div style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '14px 16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'rgba(255,255,255,0.8)', marginBottom: 8 }}>
+            <span>Progression du programme</span>
+            <span style={{ fontWeight: 700 }}>{programProgress}%</span>
           </div>
-        ))}
+          <div style={{ height: 6, background: 'rgba(255,255,255,0.2)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', background: '#fff', borderRadius: 4, width: `${programProgress}%`, transition: 'width 0.6s ease' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>
+            <span>Début</span><span>Fin</span>
+          </div>
+        </div>
       </div>
 
-      {weekData.some(d => d.séances > 0) && (
+      <div style={{ padding: '0 20px' }}>
+
+        {/* ── STATS ────────────────────────────────────────────────────── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10, marginBottom: 20 }}>
+          {stats.map((s, i) => (
+            <div key={i} className="card" style={{ textAlign: 'center', padding: '18px 10px' }}>
+              <div style={{ fontSize: 26, marginBottom: 6 }}>{s.icon}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 500, color: 'var(--text)', lineHeight: 1 }}>{s.val}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{s.lbl}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── NIVEAU XP ────────────────────────────────────────────────── */}
         <div className="card" style={{ marginBottom: 20 }}>
-          <div className="section-label" style={{ marginBottom: 16 }}>Activité des 7 derniers jours</div>
-          <ResponsiveContainer width="100%" height={120}>
-            <BarChart data={weekData} barSize={24}>
-              <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-              <YAxis hide />
-              <Tooltip
-                contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12 }}
-                formatter={(val, name) => [val, name === 'séances' ? 'Séances' : 'Humeur']}
-              />
-              <Bar dataKey="séances" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      <div className="section-label">Les 4 phases du programme</div>
-      {[
-        { n: 1, title: 'Conscience corporelle', weeks: 'Semaines 1–2', desc: 'Respiration, scan corporel, conscience du périnée' },
-        { n: 2, title: 'Renforcement', weeks: 'Semaines 3–4', desc: 'Kegel, contrôle musculaire, stop-start' },
-        { n: 3, title: 'Maîtrise active', weeks: 'Semaines 5–6', desc: 'Squeeze, gestion de l\'excitation' },
-        { n: 4, title: 'Intégration', weeks: 'Semaines 7–8', desc: 'Consolidation, confiance, intimité' },
-      ].map(p => {
-        const isDone = profile.program_phase > p.n
-        const isCurrent = profile.program_phase === p.n
-        const isLocked = profile.program_phase < p.n
-        return (
-          <div key={p.n} className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 10, opacity: isLocked ? 0.6 : 1 }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, background: isDone ? 'var(--primary-light)' : isCurrent ? 'var(--primary)' : 'var(--border)', color: isDone ? 'var(--primary)' : isCurrent ? '#fff' : 'var(--text-muted)' }}>
-              {isDone ? <i className="ti ti-check"></i> : isLocked ? <i className="ti ti-lock" style={{ fontSize: 13 }}></i> : p.n}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Niveau {xpLevel}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{profile.xp || 0} XP accumulés</div>
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Phase {p.n} — {p.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3, lineHeight: 1.5 }}>{p.desc}</div>
-              <div style={{ fontSize: 11, color: isCurrent ? 'var(--primary)' : 'var(--text-muted)', marginTop: 4, fontWeight: isCurrent ? 500 : 400 }}>
-                {p.weeks}{isCurrent ? ' · En cours' : isDone ? ' · Terminé' : ''}
-              </div>
-            </div>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>⭐</div>
           </div>
-        )
-      })}
+          <div style={{ height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ height: '100%', background: 'linear-gradient(90deg, var(--primary), #5cb8a0)', borderRadius: 4, width: `${xpPct}%`, transition: 'width 0.6s ease' }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+            <span>Niveau {xpLevel}</span>
+            <span>{(profile.xp || 0) % xpPerLevel}/{xpPerLevel} XP → Niveau {xpLevel + 1}</span>
+          </div>
+        </div>
 
-      <div className="section-label" style={{ marginTop: 24 }}>Badges ({earnedBadges.length}/{BADGES.length})</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 32 }}>
-        {BADGES.map(b => {
-          const earned = earnedBadges.find(e => e.id === b.id)
-          return (
-            <div key={b.id} style={{ textAlign: 'center', opacity: earned ? 1 : 0.35 }}>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', background: earned ? 'var(--accent-light)' : 'var(--border)', border: earned ? '2px solid var(--accent)' : '2px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, margin: '0 auto 6px' }}>{b.icon}</div>
-              <div style={{ fontSize: 10, fontWeight: 500, color: earned ? 'var(--text)' : 'var(--text-muted)', lineHeight: 1.3 }}>{b.title}</div>
+        {/* ── GRAPHIQUE ────────────────────────────────────────────────── */}
+        {weekData.some(d => d.séances > 0) ? (
+          <div className="card" style={{ marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <span className="section-label" style={{ margin: 0 }}>Activité — 7 derniers jours</span>
+              <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>
+                {weekData.reduce((a, d) => a + d.séances, 0)} séances
+              </span>
             </div>
-          )
-        })}
-      </div>
+            <ResponsiveContainer width="100%" height={110}>
+              <BarChart data={weekData} barSize={28} barCategoryGap="30%">
+                <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Bar dataKey="séances" radius={[6, 6, 0, 0]}>
+                  {weekData.map((entry, i) => (
+                    <Cell key={i} fill={entry.isToday ? 'var(--primary)' : entry.séances > 0 ? '#5cb8a0' : 'var(--border)'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="card" style={{ marginBottom: 20, textAlign: 'center', padding: '28px 20px' }}>
+            <div style={{ fontSize: 36, marginBottom: 10 }}>📊</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)', marginBottom: 6 }}>Pas encore d'activité cette semaine</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Complète ta première séance pour voir tes stats ici</div>
+          </div>
+        )}
 
-      {/* Bouton reset diagnostic */}
-      <div style={{ textAlign: 'center', marginTop: 32, paddingBottom: 8 }}>
-        <button
-          onClick={async () => {
-            if (!confirm('Recommencer le questionnaire de diagnostic ? Ton compte restera intact.')) return
-            await supabase.from('profiles').update({ onboarding_completed: false }).eq('id', profile.id)
-            window.location.reload()
-          }}
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
-        >
-          Recommencer le diagnostic
-        </button>
+        {/* ── PHASES ───────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span className="section-label" style={{ margin: 0 }}>Les 4 phases</span>
+          <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>Phase {profile.program_phase}/4</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+          {PHASES.map(p => {
+            const isDone    = profile.program_phase > p.n
+            const isCurrent = profile.program_phase === p.n
+            const isLocked  = profile.program_phase < p.n
+            return (
+              <div key={p.n} style={{
+                background: isCurrent ? 'var(--primary-light)' : 'var(--bg-card)',
+                border: `1.5px solid ${isCurrent ? 'var(--primary)' : 'var(--border)'}`,
+                borderRadius: 16, padding: '14px 16px',
+                display: 'flex', gap: 14, alignItems: 'center',
+                opacity: isLocked ? 0.5 : 1,
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  background: isDone ? 'var(--primary)' : isCurrent ? 'var(--primary)' : 'var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: isDone ? 18 : 22,
+                  color: isDone || isCurrent ? '#fff' : 'var(--text-muted)',
+                }}>
+                  {isDone ? '✓' : isLocked ? '🔒' : p.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>Phase {p.n} — {p.title}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{p.desc}</div>
+                </div>
+                {isCurrent && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: 20, padding: '3px 8px', flexShrink: 0 }}>EN COURS</span>}
+                {isDone && <span style={{ fontSize: 14, color: 'var(--primary)', flexShrink: 0 }}>✓</span>}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* ── BADGES ───────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span className="section-label" style={{ margin: 0 }}>Badges</span>
+          <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>{earnedBadges.length}/{BADGES.length} obtenus</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 32 }}>
+          {BADGES.map(b => {
+            const earned = earnedBadges.find(e => e.id === b.id)
+            return (
+              <div key={b.id} style={{ textAlign: 'center' }}>
+                <div style={{
+                  width: 54, height: 54, borderRadius: 16, margin: '0 auto 6px',
+                  background: earned ? 'var(--accent-light)' : 'var(--bg-card)',
+                  border: `2px solid ${earned ? 'var(--accent)' : 'var(--border)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 24, opacity: earned ? 1 : 0.3,
+                  transition: 'all 0.2s',
+                }}>
+                  {b.icon}
+                </div>
+                <div style={{ fontSize: 10, fontWeight: earned ? 600 : 400, color: earned ? 'var(--text)' : 'var(--text-muted)', lineHeight: 1.3 }}>
+                  {b.title}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* ── RESET ────────────────────────────────────────────────────── */}
+        <div style={{ textAlign: 'center', paddingBottom: 16 }}>
+          <button
+            onClick={async () => {
+              if (!confirm('Recommencer le questionnaire de diagnostic ? Ton compte restera intact.')) return
+              await supabase.from('profiles').update({ onboarding_completed: false }).eq('id', profile.id)
+              window.location.reload()
+            }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Recommencer le diagnostic
+          </button>
+        </div>
+
       </div>
     </div>
   )
