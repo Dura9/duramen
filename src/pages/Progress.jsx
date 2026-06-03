@@ -159,6 +159,20 @@ export default function Progress() {
           )
         })}
       </div>
+
+      {/* Bouton reset diagnostic */}
+      <div style={{ textAlign: 'center', marginTop: 32, paddingBottom: 8 }}>
+        <button
+          onClick={async () => {
+            if (!confirm('Recommencer le questionnaire de diagnostic ? Ton compte restera intact.')) return
+            await supabase.from('profiles').update({ onboarding_completed: false }).eq('id', profile.id)
+            window.location.reload()
+          }}
+          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline' }}
+        >
+          Recommencer le diagnostic
+        </button>
+      </div>
     </div>
   )
 }
