@@ -18,8 +18,22 @@ CREATE TABLE IF NOT EXISTS profiles (
   streak_last_date TIMESTAMPTZ,
   xp INTEGER DEFAULT 0,
   onboarding_completed BOOLEAN DEFAULT FALSE,
+  pedt_score INTEGER DEFAULT 0,
+  anxiety_score INTEGER DEFAULT 0,
+  past_attempts TEXT,
+  daily_minutes INTEGER DEFAULT 10,
+  result_type TEXT DEFAULT 'green',
+  mood_entry TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Colonnes ajoutées pour le nouveau questionnaire (à exécuter si la table existe déjà)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pedt_score INTEGER DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS anxiety_score INTEGER DEFAULT 0;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS past_attempts TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS daily_minutes INTEGER DEFAULT 10;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS result_type TEXT DEFAULT 'green';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS mood_entry TEXT;
 
 -- Table des séances d'exercices
 CREATE TABLE IF NOT EXISTS sessions (
