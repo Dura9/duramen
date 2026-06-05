@@ -122,9 +122,12 @@ function AppRoutes() {
   if (isPasswordReset) return <ResetPasswordScreen />
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', flexDirection: 'column', gap: 16 }}>
-      <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, color: '#4A7C6F' }}>Duramen</div>
-      <div className="spinner" style={{ borderTopColor: '#4A7C6F', borderColor: '#e8f2f0' }}></div>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100dvh', flexDirection: 'column', gap: 24, background: 'linear-gradient(160deg, #4A7C6F 0%, #3a6359 100%)' }}>
+      <div style={{ textAlign: 'center', animation: 'fadeIn 0.6s ease' }}>
+        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 40, color: '#fff', fontWeight: 400, letterSpacing: '-0.5px', marginBottom: 8 }}>Duramen</div>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.5px' }}>Ton coach personnel</div>
+      </div>
+      <div className="spinner" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,0.25)' }}></div>
     </div>
   )
 

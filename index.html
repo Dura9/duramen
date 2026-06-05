@@ -17,8 +17,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
     <title>Duramen</title>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin:0;background:#3a6359;">
+    <div id="root">
+      <!-- Écran de pré-chargement (avant que React démarre) -->
+      <div style="height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:linear-gradient(160deg,#4A7C6F 0%,#3a6359 100%);font-family:'Playfair Display',serif;">
+        <div style="text-align:center;">
+          <div style="font-size:40px;color:#fff;letter-spacing:-0.5px;">Duramen</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.6);font-family:'DM Sans',sans-serif;margin-top:8px;">Ton coach personnel</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
