@@ -159,26 +159,42 @@ export default function Coach() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(70px + env(safe-area-inset-bottom, 0px))' }}>
-      <div style={{ padding: '52px 20px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', flexShrink: 0 }}>
+
+      {/* ── HEADER GRADIENT ──────────────────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(160deg, var(--primary) 0%, #3a6359 100%)',
+        padding: '52px 20px 18px',
+        flexShrink: 0,
+        position: 'relative', overflow: 'hidden',
+        borderRadius: '0 0 24px 24px',
+      }}>
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🧠</div>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 500 }}>Alex</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Coach Duramen · {remaining} message{remaining > 1 ? 's' : ''} restant{remaining > 1 ? 's' : ''} aujourd'hui</div>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{ width: 46, height: 46, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🧠</div>
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 12, height: 12, borderRadius: '50%', background: '#4ADE80', border: '2px solid #3a6359' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 17, fontWeight: 600, color: '#fff' }}>Alex</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Coach Duramen · En ligne</div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#fff', fontWeight: 500, flexShrink: 0 }}>
+            {remaining} msg
           </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 20 }}>
+      {/* ── MESSAGES ─────────────────────────────────────────────────── */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 20 }}>
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
             {msg.role === 'assistant' && (
-              <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.5px', marginBottom: 4, paddingLeft: 4 }}>ALEX</div>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🧠</div>
             )}
             <div style={{
-              maxWidth: '82%',
+              maxWidth: '80%',
               padding: '12px 16px',
-              borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+              borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
               background: msg.role === 'user' ? 'var(--primary)' : 'var(--bg-card)',
               color: msg.role === 'user' ? '#fff' : 'var(--text)',
               fontSize: 14,
@@ -193,9 +209,9 @@ export default function Coach() {
         ))}
 
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4, paddingLeft: 4 }}>ALEX</div>
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px 16px 16px 4px', padding: '12px 16px', display: 'flex', gap: 4, alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🧠</div>
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '18px 18px 18px 4px', padding: '14px 16px', display: 'flex', gap: 4, alignItems: 'center' }}>
               {[0, 1, 2].map(i => (
                 <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)', animation: 'blink 1.2s infinite', animationDelay: `${i * 0.2}s` }}></div>
               ))}
@@ -204,20 +220,21 @@ export default function Coach() {
         )}
 
         {remaining === 0 && (
-          <div style={{ background: 'var(--accent-light)', border: '1px solid #e8c97a', borderRadius: 12, padding: '12px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: '#7a5c00', marginBottom: 4 }}>Limite quotidienne atteinte</div>
-            <div style={{ fontSize: 13, color: '#9a7a20' }}>Tu as utilisé tes 5 messages gratuits d'aujourd'hui. Reviens demain !</div>
+          <div style={{ background: 'var(--accent-light)', border: '1px solid #e8c97a', borderRadius: 14, padding: '14px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00', marginBottom: 4 }}>Limite quotidienne atteinte</div>
+            <div style={{ fontSize: 13, color: '#9a7a20' }}>Tu as utilisé tes {FREE_LIMIT} messages d'aujourd'hui. Reviens demain ! 🌙</div>
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
+      {/* ── BARRE DE SAISIE ──────────────────────────────────────────── */}
       <div style={{ padding: '12px 16px 20px', background: 'var(--bg)', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         {messages.length <= 2 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
             {QUICK_QUESTIONS.map((q, i) => (
-              <button key={i} onClick={() => send(q)} style={{ fontSize: 12, padding: '6px 12px', border: '1px solid var(--border)', borderRadius: 20, background: 'var(--bg-card)', color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.15s' }}>
+              <button key={i} onClick={() => send(q)} style={{ fontSize: 12, padding: '7px 13px', border: '1px solid var(--border)', borderRadius: 20, background: 'var(--bg-card)', color: 'var(--primary)', cursor: 'pointer', fontWeight: 500, transition: 'all 0.15s' }}>
                 {q}
               </button>
             ))}
@@ -234,7 +251,7 @@ export default function Coach() {
             disabled={remaining === 0 || loading}
             rows={1}
             style={{
-              flex: 1, padding: '12px 14px', borderRadius: 12, border: '1px solid var(--border)',
+              flex: 1, padding: '12px 16px', borderRadius: 22, border: '1px solid var(--border)',
               fontSize: 14, background: 'var(--bg-card)', color: 'var(--text)',
               outline: 'none', resize: 'none', maxHeight: 100,
               opacity: remaining === 0 ? 0.5 : 1,
@@ -244,7 +261,7 @@ export default function Coach() {
           <button
             onClick={() => send(input)}
             disabled={!input.trim() || loading || remaining === 0}
-            style={{ width: 42, height: 42, borderRadius: '50%', background: 'var(--primary)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: (!input.trim() || loading || remaining === 0) ? 0.5 : 1, cursor: 'pointer' }}
+            style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--primary)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: (!input.trim() || loading || remaining === 0) ? 0.5 : 1, cursor: 'pointer', transition: 'opacity 0.15s' }}
           >
             <i className="ti ti-send" style={{ fontSize: 18, color: '#fff' }}></i>
           </button>
