@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-const EDITOR = 'Duramen'
-const CONTACT_EMAIL = 'contact@duramen.app'
+const EDITOR = 'Dura Tech'
+const CONTACT_EMAIL = 'duramenplus@gmail.com'
 const LAST_UPDATE = 'Juin 2026'
 
 // ─── COMPOSANTS DE MISE EN FORME ──────────────────────────────────────────────

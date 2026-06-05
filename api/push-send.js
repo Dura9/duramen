@@ -9,7 +9,7 @@ const supabase = createClient(
 )
 
 webpush.setVapidDetails(
-  'mailto:contact@duramen.app',
+  'mailto:duramenplus@gmail.com',
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 )
