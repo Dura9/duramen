@@ -89,7 +89,7 @@ export default function Onboarding() {
       setLoading(true)
       const profileType = answers.profile_type || 'cognitive'
       const isConditioned = profileType === 'conditioned'
-      await supabase.from('profiles').upsert({
+      const { error } = await supabase.from('profiles').upsert({
         id: user.id,
         email: user.email,
         profile_type: profileType,
@@ -107,6 +107,7 @@ export default function Onboarding() {
         onboarding_completed: true,
         created_at: new Date().toISOString(),
       })
+      if (error) { alert('Erreur : ' + error.message); setLoading(false); return }
       await refreshProfile()
       setLoading(false)
     } else {
