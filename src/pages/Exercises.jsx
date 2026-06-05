@@ -197,7 +197,7 @@ export default function Exercises() {
 
   const program = getProgram(profile?.profile_type)
   const maxPhase = program.phases.length
-  const SESSIONS_PER_PHASE = 4 // séances pour débloquer la phase suivante
+  const SESSIONS_PER_PHASE = 2 // séances pour débloquer la phase suivante (réduit pour la phase de test — repasser à 4 pour le lancement réel)
   // program_phase peut valoir 0 (anciens profils conditionnés) → on ramène à 1
   const currentPhase = Math.min(Math.max(profile?.program_phase || 1, 1), maxPhase)
 
