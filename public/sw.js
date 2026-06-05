@@ -1,4 +1,10 @@
-// Service Worker Duramen — gère les notifications push
+// Service Worker Duramen — notifications push + installabilité PWA
+
+self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()))
+
+// Handler fetch minimal (requis pour rendre l'app installable)
+self.addEventListener('fetch', () => {})
 
 self.addEventListener('push', event => {
   if (!event.data) return

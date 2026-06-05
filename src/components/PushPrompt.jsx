@@ -24,8 +24,11 @@ export default function PushPrompt() {
     if (Notification.permission !== 'default') return
     const dismissed = localStorage.getItem('duramen_push_dismissed')
     if (dismissed) return
-    // Afficher après 3 secondes
-    const t = setTimeout(() => setShow(true), 3000)
+    // Afficher après 8 secondes, sauf si la bannière d'installation est active
+    const t = setTimeout(() => {
+      if (sessionStorage.getItem('duramen_install_active')) return
+      setShow(true)
+    }, 8000)
     return () => clearTimeout(t)
   }, [user])
 
