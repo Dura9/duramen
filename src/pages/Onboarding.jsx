@@ -134,6 +134,14 @@ export default function Onboarding() {
       <button className="btn-primary" onClick={goNext} style={{ fontSize: 16, padding: '16px' }}>
         Découvrir mon profil →
       </button>
+      {!user && (
+        <button
+          onClick={() => navigate('/auth')}
+          style={{ marginTop: 20, background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer', textAlign: 'center' }}
+        >
+          J'ai déjà un compte · <span style={{ color: 'var(--primary)', fontWeight: 500 }}>Se connecter</span>
+        </button>
+      )}
     </div>
   )
 
