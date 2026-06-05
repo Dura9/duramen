@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { launchConfetti } from '../hooks/useConfetti'
 import { getProgram, getPhaseExercises } from '../data/programs'
+import { track } from '../lib/analytics'
 
 // ── MODAL EXERCICE ────────────────────────────────────────────────────────────
 function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
@@ -209,6 +210,7 @@ export default function Exercises() {
       user_id: user.id, exercise_id: ex.id, mood, xp_earned: ex.xp,
       completed_at: new Date().toISOString(),
     })
+    track('exercise_complete', { id: ex.id, phase: currentPhase, mood })
 
     const today = new Date().toDateString()
     const lastDate = profile.streak_last_date ? new Date(profile.streak_last_date).toDateString() : null
@@ -310,7 +312,7 @@ export default function Exercises() {
                 {phaseExercises.map(ex => (
                   <button
                     key={ex.id}
-                    onClick={() => !isLocked && setActiveExercise(ex)}
+                    onClick={() => { if (!isLocked) { track('exercise_start', { id: ex.id, phase: ph.n }); setActiveExercise(ex) } }}
                     disabled={isLocked}
                     style={{
                       display: 'flex', gap: 14, alignItems: 'center',

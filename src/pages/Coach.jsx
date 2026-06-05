@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { getProgram, getPhaseExercises } from '../data/programs'
+import { track } from '../lib/analytics'
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression' }
 const FREE_LIMIT = 20
@@ -137,6 +138,7 @@ export default function Coach() {
 
   useEffect(() => {
     loadTodayCount()
+    track('coach_open', { context: location.state?.checkin ? 'checkin' : location.state?.debrief ? 'debrief' : location.state?.reengage ? 'reengage' : 'direct' })
     const streak = profile?.streak || 0
     const streakLine = streak > 0
       ? `Bravo pour tes ${streak} jour${streak > 1 ? 's' : ''} de suite 🔥 — la régularité, c'est 80 % du travail.`
@@ -170,6 +172,7 @@ export default function Coach() {
     if (!text.trim() || loading) return
     if (msgCount >= FREE_LIMIT) return
 
+    track('coach_message')
     const newMessages = [...messages, { role: 'user', content: text }]
     setMessages(newMessages)
     setInput('')

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import { ThemeProvider } from './hooks/useTheme'
 import { supabase } from './lib/supabase'
+import { track } from './lib/analytics'
 import Onboarding from './pages/Onboarding'
 import Auth from './pages/Auth'
 import Home from './pages/Home'
@@ -101,6 +102,7 @@ function AppRoutes() {
       onboarding_completed: true,
       created_at: new Date().toISOString(),
     }).then(() => {
+      track('signup', { profile_type: profileType })
       sessionStorage.removeItem('duramen_onboarding')
       refreshProfile()
     })

@@ -76,3 +76,32 @@ CREATE POLICY "Users can insert own sessions" ON sessions FOR INSERT WITH CHECK 
 
 CREATE POLICY "Users can view own messages" ON chat_messages FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own messages" ON chat_messages FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- =============================================
+-- ANALYTICS & FEEDBACK (pour piloter le test réel)
+-- =============================================
+
+-- Événements (funnel : onboarding, signup, exercices, coach...)
+CREATE TABLE IF NOT EXISTS events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  anon_id TEXT,
+  event TEXT NOT NULL,
+  props JSONB,
+  path TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+-- Tout le monde (même anonyme) peut insérer un événement, personne ne peut lire (analyse côté admin Supabase)
+CREATE POLICY "Anyone can insert events" ON events FOR INSERT WITH CHECK (true);
+
+-- Retours utilisateurs
+CREATE TABLE IF NOT EXISTS feedback (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  rating INTEGER,
+  message TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert feedback" ON feedback FOR INSERT WITH CHECK (true);

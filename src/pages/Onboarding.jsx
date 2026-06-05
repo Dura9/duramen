@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { track } from '../lib/analytics'
 
 // ─── DONNÉES PROFIL ───────────────────────────────────────────────────────────
 const PROFILE_LABELS = {
@@ -64,6 +65,13 @@ export default function Onboarding() {
   const qNumber = QUESTION_STEPS.indexOf(step) + 1
   const progress = isQuestion ? (qNumber / 6) * 100 : null
 
+  // Analytics : début de l'onboarding (1 fois)
+  useEffect(() => { track('onboarding_start') }, [])
+  // Analytics : suivi de la progression question par question (mesure les abandons)
+  useEffect(() => {
+    if (isQuestion) track('onboarding_step', { q: qNumber })
+  }, [step])
+
   function goNext() {
     setFadeKey(k => k + 1)
     setStepIndex(i => i + 1)
@@ -108,10 +116,12 @@ export default function Onboarding() {
         created_at: new Date().toISOString(),
       })
       if (error) { alert('Erreur : ' + error.message); setLoading(false); return }
+      track('onboarding_complete', { profile_type: profileType, returning: true })
       await refreshProfile()
       setLoading(false)
     } else {
       // Pas encore connecté → sauvegarder en session et aller vers Auth
+      track('onboarding_complete', { profile_type: answers.profile_type || 'cognitive', returning: false })
       sessionStorage.setItem('duramen_onboarding', JSON.stringify(answers))
       navigate('/auth')
     }

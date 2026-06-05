@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import FeedbackCard from '../components/FeedbackCard'
 
 function Section({ title, children }) {
   return (
@@ -188,6 +189,9 @@ export default function Account() {
             </div>
           </button>
         </Section>
+
+        {/* ── FEEDBACK ─────────────────────────────────────────────────── */}
+        <FeedbackCard />
 
         {/* ── COMPTE ───────────────────────────────────────────────────── */}
         <Section title="Compte">
