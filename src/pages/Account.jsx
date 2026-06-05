@@ -133,6 +133,30 @@ export default function Account() {
           <Row icon="🔒" label="Mot de passe" value="••••••••"             onClick={() => openModal('password')} last />
         </Section>
 
+        {/* ── NOTIFICATIONS ────────────────────────────────────────────── */}
+        <Section title="Notifications">
+          <button
+            onClick={async () => {
+              localStorage.removeItem('duramen_push_dismissed')
+              if (Notification.permission === 'denied') {
+                alert('Les notifications sont bloquées dans ton navigateur. Va dans les réglages de ton navigateur pour les autoriser pour ce site.')
+                return
+              }
+              window.location.reload()
+            }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
+          >
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🔔</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Rappel quotidien</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {Notification.permission === 'granted' ? 'Notifications activées ✓' : 'Appuie pour activer'}
+              </div>
+            </div>
+            <i className="ti ti-chevron-right" style={{ color: 'var(--text-muted)', fontSize: 16 }}></i>
+          </button>
+        </Section>
+
         {/* ── PRÉFÉRENCES ──────────────────────────────────────────────── */}
         <Section title="Préférences">
           <button
