@@ -4,6 +4,57 @@ import { useAuth } from '../hooks/useAuth'
 import { launchConfetti } from '../hooks/useConfetti'
 
 const EXERCISES = [
+  // ── PHASE 0 — Reconditionnement ───────────────────────────────────────────
+  {
+    id: 'conscious_masturb', phase: 0,
+    emoji: '🧠', color: '#D4A855', bg: '#fdf6e3',
+    title: 'Masturbation consciente',
+    subtitle: 'Reconditionnement sensoriel',
+    duration: '15 min', level: 1, xp: 15,
+    steps: [
+      { text: 'Installe-toi dans un endroit calme, sans téléphone, sans écran.', duration: 10 },
+      { text: 'Commence une stimulation lente et intentionnelle, sans chercher à éjaculer rapidement. L\'objectif est d\'explorer les sensations, pas d\'atteindre l\'orgasme.', duration: 30 },
+      { text: 'Porte ton attention sur les sensations physiques précises — chaleur, pression, texture. Reste dans ton corps.', duration: 60 },
+      { text: 'Si ton esprit cherche des images ou des fantasmes visuels intenses, reviens doucement à la sensation physique. C\'est normal — ne te juge pas.', duration: 30 },
+      { text: 'Continue à un rythme lent pendant 10 minutes minimum. Si tu sens l\'éjaculation approcher, ralentis — mais ne t\'arrête pas complètement.', duration: 600 },
+      { text: 'Termine la séance. Que tu aies éjaculé ou non, tu as accompli quelque chose d\'important : tu as commencé à reconnecter ton cerveau aux sensations réelles.', duration: 20 },
+    ],
+    note: 'La masturbation consciente sans pornographie est la première étape du reconditionnement neurologique. Elle réapprend au cerveau à trouver du plaisir dans une stimulation normale, sans hyperstimulation visuelle.',
+  },
+  {
+    id: 'porn_reduction', phase: 0,
+    emoji: '📉', color: '#D4A855', bg: '#fdf6e3',
+    title: 'Réduction progressive',
+    subtitle: 'Reconditionnement comportemental',
+    duration: '5 min', level: 1, xp: 10,
+    steps: [
+      { text: 'Note mentalement ta consommation habituelle de pornographie par semaine. Sois honnête avec toi-même.', duration: 20 },
+      { text: 'L\'objectif n\'est pas la culpabilité — c\'est la conscience. Le problème n\'est pas la pornographie en soi, c\'est le conditionnement qu\'elle a créé dans ton corps.', duration: 15 },
+      { text: 'Pour cette semaine, fixe-toi un objectif de réduction de 50 %. Si tu regardes 6 fois par semaine, vise 3. Si tu regardes tous les jours, vise un jour sur deux.', duration: 20 },
+      { text: 'Remplace ces moments par une séance Duramen. Pas par volonté — par substitution progressive.', duration: 15 },
+      { text: 'À la fin de la semaine, fais le bilan avec Alex. Il adaptera ton programme en fonction.', duration: 10 },
+    ],
+    note: 'La réduction progressive est plus efficace que l\'arrêt brutal, qui crée souvent un effet rebond. L\'objectif est de ne plus dépendre de la pornographie pour l\'excitation, pas nécessairement de l\'éliminer complètement.',
+  },
+  {
+    id: 'body_reconnect', phase: 0,
+    emoji: '🫁', color: '#D4A855', bg: '#fdf6e3',
+    title: 'Reconnexion corps entier',
+    subtitle: 'Pleine conscience corporelle',
+    duration: '12 min', level: 1, xp: 10,
+    steps: [
+      { text: 'Allonge-toi confortablement. Ferme les yeux. Fais 3 respirations profondes.', duration: 30 },
+      { text: 'Porte ton attention sur tes mains. Sens leur température, leur poids.', duration: 20 },
+      { text: 'Remonte vers les bras, les épaules, le cou. Où sens-tu de la tension ? Relâche-la sans forcer.', duration: 40 },
+      { text: 'Descends vers le torse, le ventre. Observe comment ta respiration le fait bouger.', duration: 30 },
+      { text: 'Porte attention au bas du ventre et au périnée. Est-ce que cette zone est tendue ou détendue ?', duration: 40 },
+      { text: 'Observe : sens-tu une connexion entre cette zone et le reste de ton corps, ou semble-t-elle isolée ? Il n\'y a pas de bonne réponse.', duration: 30 },
+      { text: 'Fais 5 respirations en imaginant envoyer de l\'air vers le bas du ventre à chaque inspiration.', duration: 60 },
+      { text: 'Ouvre les yeux doucement. Cette reconnexion est la base de tout ce qui vient ensuite.', duration: 20 },
+    ],
+    note: 'Les hommes avec EP conditionnée ont souvent une dissociation entre la zone génitale et le reste du corps. Cet exercice rétablit la connexion neurologique nécessaire pour un contrôle éjaculatoire durable.',
+  },
+  // ── PHASE 1 ───────────────────────────────────────────────────────────────
   {
     id: 'breathing', phase: 1,
     emoji: '🌬️', color: '#4A7C6F', bg: '#e8f2f0',
@@ -94,7 +145,8 @@ const EXERCISES = [
 ]
 
 const PHASE_INFO = {
-  1: { label: 'Conscience corporelle', color: '#4A7C6F', emoji: '🧘' },
+  0: { label: 'Reconditionnement',      color: '#D4A855', emoji: '🔄' },
+  1: { label: 'Conscience corporelle',  color: '#4A7C6F', emoji: '🧘' },
   2: { label: 'Renforcement',           color: '#D4A855', emoji: '💪' },
   3: { label: 'Maîtrise active',        color: '#7C6F4A', emoji: '🎯' },
 }
@@ -311,7 +363,9 @@ export default function Exercises() {
     if (shouldAdvancePhase) setPhaseUnlocked(currentPhase + 1)
   }
 
-  const currentPhase = profile?.program_phase || 1
+  const currentPhase = profile?.program_phase ?? 1
+  const showPhase0 = profile?.flag_conditioned_high || profile?.flag_conditioned_moderate
+  const phases = showPhase0 ? [0, 1, 2, 3] : [1, 2, 3]
 
   return (
     <div className="page fade-in" style={{ paddingTop: 0 }}>
@@ -329,8 +383,8 @@ export default function Exercises() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, marginBottom: 16 }}>Exercices</h1>
 
         {/* Phases indicator */}
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[1, 2, 3].map(p => (
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+          {phases.map(p => (
             <div key={p} style={{
               flex: 1, padding: '8px 10px', borderRadius: 12,
               background: p === currentPhase ? 'rgba(255,255,255,0.2)' : p < currentPhase ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
@@ -347,10 +401,11 @@ export default function Exercises() {
       </div>
 
       <div style={{ padding: '0 20px' }}>
-        {[1, 2, 3].map(phase => {
+        {phases.map(phase => {
           const phaseExercises = EXERCISES.filter(e => e.phase === phase)
-          const isLocked   = phase > currentPhase
-          const isDone     = phase < currentPhase
+          const isPhase0   = phase === 0
+          const isLocked   = !isPhase0 && phase > currentPhase
+          const isDone     = !isPhase0 && phase < currentPhase
           const isCurrent  = phase === currentPhase
           const info       = PHASE_INFO[phase]
 
@@ -365,9 +420,10 @@ export default function Exercises() {
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{info.label}</div>
                   </div>
                 </div>
-                {isLocked && <span style={{ fontSize: 11, background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '3px 10px', borderRadius: 20 }}>🔒 Verrouillé</span>}
-                {isDone   && <span style={{ fontSize: 11, background: 'var(--primary-light)', color: 'var(--primary)', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>✓ Terminé</span>}
-                {isCurrent && <span style={{ fontSize: 11, background: '#fdf6e3', color: '#7a5c00', border: '1px solid #e8c97a', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>En cours</span>}
+                {isPhase0  && <span style={{ fontSize: 11, background: '#fdf6e3', color: '#7a5c00', border: '1px solid #e8c97a', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>Prioritaire</span>}
+                {isLocked  && <span style={{ fontSize: 11, background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '3px 10px', borderRadius: 20 }}>🔒 Verrouillé</span>}
+                {isDone    && <span style={{ fontSize: 11, background: 'var(--primary-light)', color: 'var(--primary)', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>✓ Terminé</span>}
+                {isCurrent && !isPhase0 && <span style={{ fontSize: 11, background: '#fdf6e3', color: '#7a5c00', border: '1px solid #e8c97a', padding: '3px 10px', borderRadius: 20, fontWeight: 600 }}>En cours</span>}
               </div>
 
               {/* Cartes exercices */}
@@ -375,15 +431,15 @@ export default function Exercises() {
                 {phaseExercises.map(ex => (
                   <button
                     key={ex.id}
-                    onClick={() => !isLocked && !ex.locked && setActiveExercise(ex)}
-                    disabled={isLocked || ex.locked}
+                    onClick={() => !(isLocked && !isPhase0) && !ex.locked && setActiveExercise(ex)}
+                    disabled={(isLocked && !isPhase0) || ex.locked}
                     style={{
                       display: 'flex', gap: 14, alignItems: 'center',
                       background: 'var(--bg-card)', borderRadius: 16,
                       border: `1.5px solid ${isCurrent && !ex.locked ? 'var(--border)' : 'var(--border)'}`,
                       padding: '14px 16px',
                       opacity: isLocked || ex.locked ? 0.45 : 1,
-                      cursor: isLocked || ex.locked ? 'not-allowed' : 'pointer',
+                      cursor: (isLocked && !isPhase0) || ex.locked ? 'not-allowed' : 'pointer',
                       textAlign: 'left', width: '100%',
                       transition: 'all 0.15s',
                       boxShadow: isCurrent && !ex.locked ? 'var(--shadow)' : 'none',
