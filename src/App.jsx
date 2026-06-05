@@ -10,6 +10,7 @@ import Exercises from './pages/Exercises'
 import Coach from './pages/Coach'
 import Progress from './pages/Progress'
 import Account from './pages/Account'
+import Legal from './pages/Legal'
 import BottomNav from './components/BottomNav'
 import PushPrompt from './components/PushPrompt'
 
@@ -133,6 +134,8 @@ function AppRoutes() {
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/legal/:doc" element={<Legal />} />
         <Route path="*" element={<Navigate to={returning ? '/auth' : '/onboarding'} replace />} />
       </Routes>
     )
@@ -153,6 +156,8 @@ function AppRoutes() {
         <Route path="/coach" element={<Coach />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/legal/:doc" element={<Legal />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />

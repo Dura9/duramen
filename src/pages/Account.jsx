@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
@@ -46,6 +47,7 @@ function Row({ icon, label, value, onClick, danger, last }) {
 export default function Account() {
   const { user, profile, refreshProfile } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
+  const navigate = useNavigate()
 
   const [modal, setModal] = useState(null) // 'email' | 'password' | 'name' | null
   const [value1, setValue1] = useState('')
@@ -200,9 +202,9 @@ export default function Account() {
         <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
             Duramen v1.0 · Application réservée aux +18 ans<br/>
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Conditions d'utilisation</span>
+            <span onClick={() => navigate('/legal/cgu')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Conditions d'utilisation</span>
             {' · '}
-            <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>Politique de confidentialité</span>
+            <span onClick={() => navigate('/legal/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Politique de confidentialité</span>
           </div>
         </div>
 

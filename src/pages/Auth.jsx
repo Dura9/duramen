@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Auth() {
+  const navigate = useNavigate()
   const [mode, setMode] = useState('login') // 'login' | 'register' | 'forgot'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -117,7 +119,10 @@ export default function Auth() {
       </div>
 
       <p style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', marginTop: 24, lineHeight: 1.6 }}>
-        En vous inscrivant, vous acceptez nos conditions d'utilisation.<br/>
+        En vous inscrivant, vous acceptez nos{' '}
+        <span onClick={() => navigate('/legal/cgu')} style={{ color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer' }}>conditions d'utilisation</span>{' '}
+        et notre{' '}
+        <span onClick={() => navigate('/legal/confidentialite')} style={{ color: 'var(--primary)', textDecoration: 'underline', cursor: 'pointer' }}>politique de confidentialité</span>.<br/>
         Cette application est réservée aux adultes (+18 ans).
       </p>
     </div>
