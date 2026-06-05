@@ -12,6 +12,7 @@ import Coach from './pages/Coach'
 import Progress from './pages/Progress'
 import Account from './pages/Account'
 import Legal from './pages/Legal'
+import Admin from './pages/Admin'
 import BottomNav from './components/BottomNav'
 import PushPrompt from './components/PushPrompt'
 import InstallPrompt from './components/InstallPrompt'
@@ -142,6 +143,7 @@ function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/legal/:doc" element={<Legal />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<Navigate to={returning ? '/auth' : '/onboarding'} replace />} />
       </Routes>
     )
@@ -164,6 +166,7 @@ function AppRoutes() {
         <Route path="/account" element={<Account />} />
         <Route path="/legal" element={<Legal />} />
         <Route path="/legal/:doc" element={<Legal />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <BottomNav />
