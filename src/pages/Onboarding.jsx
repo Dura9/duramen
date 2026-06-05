@@ -43,9 +43,9 @@ const DESIRE_TEXT = {
 }
 
 // ─── SÉQUENCE ─────────────────────────────────────────────────────────────────
-// intro → q1 → insert1 → q2 → q3 → q4 → insert2 → q5 → q6 → result → email
+// intro → q1 → insert1 → q2 → q3 → q4 → insert2 → q5 → q6 → result
 const STEPS = [
-  'intro', 'q1', 'insert1', 'q2', 'q3', 'q4', 'insert2', 'q5', 'q6', 'result', 'email'
+  'intro', 'q1', 'insert1', 'q2', 'q3', 'q4', 'insert2', 'q5', 'q6', 'result'
 ]
 const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6']
 
@@ -209,50 +209,16 @@ export default function Onboarding() {
         </p>
 
         {/* BLOC 5 — CTA */}
-        <button className="btn-primary" onClick={goNext} style={{ padding: '16px', fontSize: 15, marginBottom: 12 }}>
-          Créer mon compte gratuit et commencer →
+        <button className="btn-primary" onClick={() => handleFinish(null)} disabled={loading} style={{ padding: '16px', fontSize: 15, marginBottom: 12 }}>
+          {loading ? <span className="spinner"></span> : 'Commencer mon programme →'}
         </button>
         <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }}>
-          ✓ Gratuit pour commencer · ✓ Sans carte bancaire · ✓ Résultats en 4 semaines
+          ✓ Programme personnalisé · ✓ Coach IA inclus · ✓ Résultats en 4 semaines
         </div>
       </div>
     )
   }
 
-  // ── EMAIL ───────────────────────────────────────────────────────────────────
-  if (step === 'email') return (
-    <div key={fadeKey} className="fade-in" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 28px', background: 'var(--bg)' }}>
-      <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', marginBottom: 10, lineHeight: 1.3 }}>Envoie-moi mon programme complet</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-          Tu recevras ton profil détaillé et ton programme personnalisé directement dans ta boîte mail.
-        </p>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="email"
-          value={emailInput}
-          onChange={e => setEmailInput(e.target.value)}
-          placeholder="ton@email.com"
-          style={{ width: '100%', padding: '14px 16px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', fontSize: 15, background: 'var(--bg-card)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }}
-        />
-        <button
-          className="btn-primary"
-          disabled={loading}
-          onClick={() => handleFinish(emailInput)}
-        >
-          {loading ? <span className="spinner"></span> : 'Recevoir mon programme →'}
-        </button>
-        <button
-          onClick={() => handleFinish(null)}
-          disabled={loading}
-          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer', padding: '8px', textDecoration: 'underline' }}
-        >
-          Continuer sans email
-        </button>
-      </div>
-    </div>
-  )
 
   // ── QUESTIONS ───────────────────────────────────────────────────────────────
   const canGoBack = stepIndex > 1 && isQuestion && step !== 'q1'
