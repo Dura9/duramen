@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import { getProgram, getPhaseExercises } from '../data/programs'
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -96,6 +97,13 @@ export default function Home() {
   if (!profile) return null
 
   const streak = profile.streak || 0
+
+  // Exercice du jour : 1er exercice de la phase courante du programme du profil
+  const program = getProgram(profile.profile_type)
+  const phaseCount = program.phases.length
+  const curPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
+  const phaseExos = getPhaseExercises(program, curPhase)
+  const todayExo = phaseExos[(streak) % phaseExos.length] || phaseExos[0]
   const { msg: streakMsg, sub: streakSub } = getStreakMessage(streak)
   const xpPerLevel = 200
   const xpCurrent = (profile.xp || 0) % xpPerLevel
@@ -256,14 +264,14 @@ export default function Home() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 24,
             }}>
-              {todayDone ? '✅' : '🌬️'}
+              {todayDone ? '✅' : (todayExo?.emoji || '🌬️')}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 16, fontWeight: 600, color: todayDone ? 'var(--text)' : '#fff', marginBottom: 4 }}>
-                Respiration diaphragmatique
+                {todayExo?.title || 'Ta séance du jour'}
               </div>
               <div style={{ fontSize: 13, color: todayDone ? 'var(--text-muted)' : 'rgba(255,255,255,0.7)' }}>
-                8 min · Conscience corporelle
+                {todayExo ? `${todayExo.duration} · ${todayExo.subtitle}` : 'Programme personnalisé'}
               </div>
             </div>
             {todayDone ? (

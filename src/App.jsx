@@ -94,7 +94,7 @@ function AppRoutes() {
       situation: answers.situation || 'single',
       level: 1,
       program_week: 1,
-      program_phase: isConditioned ? 0 : 1,
+      program_phase: 1,
       flag_conditioned_high: isConditioned,
       flag_conditioned_moderate: false,
       streak: 0, streak_last_date: null, xp: 0,

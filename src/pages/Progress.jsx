@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts'
+import { getProgram } from '../data/programs'
 
 const BADGES = [
   { id: 'first_session', icon: '🌱', title: 'Premier pas',   desc: 'Première séance',          condition: (s, p) => s.length >= 1 },
@@ -12,13 +13,6 @@ const BADGES = [
   { id: 'sessions_20',   icon: '🏆', title: 'Expert',        desc: '20 séances complétées',     condition: (s, p) => s.length >= 20 },
   { id: 'kegel_5',       icon: '🎯', title: 'Kegel Master',  desc: '5 séances Kegel',           condition: (s, p) => s.filter(x => x.exercise_id?.includes('kegel')).length >= 5 },
   { id: 'xp_100',        icon: '⭐', title: '100 XP',        desc: '100 XP accumulés',          condition: (s, p) => p.xp >= 100 },
-]
-
-const PHASES = [
-  { n: 1, title: 'Conscience corporelle', weeks: 'Semaines 1–2', icon: '🧘', desc: 'Respiration, scan corporel, périnée' },
-  { n: 2, title: 'Renforcement',          weeks: 'Semaines 3–4', icon: '💪', desc: 'Kegel, contrôle musculaire, stop-start' },
-  { n: 3, title: 'Maîtrise active',       weeks: 'Semaines 5–6', icon: '🎯', desc: 'Squeeze, gestion de l\'excitation' },
-  { n: 4, title: 'Intégration',           weeks: 'Semaines 7–8', icon: '✨', desc: 'Consolidation, confiance, intimité' },
 ]
 
 const DAYS_FR = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam']
@@ -66,6 +60,10 @@ export default function Progress() {
     { icon: '⭐', val: profile.xp || 0,       lbl: 'XP total',        color: '#d4a855' },
     { icon: '🏅', val: `${earnedBadges.length}/${BADGES.length}`, lbl: 'Badges', color: '#7c6f4a' },
   ]
+
+  const program = getProgram(profile.profile_type)
+  const phaseCount = program.phases.length
+  const currentPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
 
   return (
     <div className="page fade-in" style={{ paddingTop: 0 }}>
@@ -158,15 +156,16 @@ export default function Progress() {
         )}
 
         {/* ── PHASES ───────────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span className="section-label" style={{ margin: 0 }}>Les 4 phases</span>
-          <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>Phase {profile.program_phase}/4</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+          <span className="section-label" style={{ margin: 0 }}>Mon programme · {program.label}</span>
+          <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>Phase {currentPhase}/{phaseCount}</span>
         </div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>{program.intro}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {PHASES.map(p => {
-            const isDone    = profile.program_phase > p.n
-            const isCurrent = profile.program_phase === p.n
-            const isLocked  = profile.program_phase < p.n
+          {program.phases.map(p => {
+            const isDone    = currentPhase > p.n
+            const isCurrent = currentPhase === p.n
+            const isLocked  = currentPhase < p.n
             return (
               <div key={p.n} style={{
                 background: isCurrent ? 'var(--primary-light)' : 'var(--bg-card)',
@@ -182,11 +181,11 @@ export default function Progress() {
                   fontSize: isDone ? 18 : 22,
                   color: isDone || isCurrent ? '#fff' : 'var(--text-muted)',
                 }}>
-                  {isDone ? '✓' : isLocked ? '🔒' : p.icon}
+                  {isDone ? '✓' : isLocked ? '🔒' : p.emoji}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>Phase {p.n} — {p.title}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{p.desc}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>{p.focus}</div>
                 </div>
                 {isCurrent && <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--primary)', background: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: 20, padding: '3px 8px', flexShrink: 0 }}>EN COURS</span>}
                 {isDone && <span style={{ fontSize: 14, color: 'var(--primary)', flexShrink: 0 }}>✓</span>}
