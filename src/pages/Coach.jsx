@@ -142,9 +142,16 @@ export default function Coach() {
       ? `Bravo pour tes ${streak} jour${streak > 1 ? 's' : ''} de suite 🔥 — la régularité, c'est 80 % du travail.`
       : `Le plus important, c'est de commencer. Chaque petit pas compte.`
 
-    const greeting = location.state?.checkin
-      ? `Salut ${profile?.first_name} 👋 C'est l'heure de ton bilan de la semaine. Raconte-moi : comment ça s'est passé ? Tu as réussi à faire tes séances, ou ça a été compliqué ? On ajuste ensemble, sans jugement.`
-      : `Salut ${profile?.first_name}, je suis Alex, ton coach personnel 🤝\n\nJe connais ton profil (${coaching.name}) et ton programme. Je suis là pour t'accompagner, répondre à tes questions et t'aider à tenir le cap — surtout les jours où c'est dur.\n\n${streakLine}\n\nDe quoi as-tu envie de parler aujourd'hui ?`
+    let greeting
+    if (location.state?.checkin) {
+      greeting = `Salut ${profile?.first_name} 👋 C'est l'heure de ton bilan de la semaine. Raconte-moi : comment ça s'est passé ? Tu as réussi à faire tes séances, ou ça a été compliqué ? On ajuste ensemble, sans jugement.`
+    } else if (location.state?.debrief) {
+      greeting = `Bravo d'avoir terminé "${location.state.debrief}" 👏 ${streakLine}\n\nDis-moi : comment ça s'est passé ? Qu'est-ce que tu as ressenti pendant l'exercice ? Si quelque chose t'a gêné ou questionné, on en parle.`
+    } else if (location.state?.reengage) {
+      greeting = `Content de te revoir, ${profile?.first_name} 🤗 Une pause, ça arrive à tout le monde — l'important c'est que tu sois là maintenant. On ne repart pas de zéro, on reprend où tu en étais.\n\nQu'est-ce qui t'a fait décrocher ces derniers jours ? Sans culpabiliser — juste pour qu'on trouve ensemble comment t'aider à tenir.`
+    } else {
+      greeting = `Salut ${profile?.first_name}, je suis Alex, ton coach personnel 🤝\n\nJe connais ton profil (${coaching.name}) et ton programme. Je suis là pour t'accompagner, répondre à tes questions et t'aider à tenir le cap — surtout les jours où c'est dur.\n\n${streakLine}\n\nDe quoi as-tu envie de parler aujourd'hui ?`
+    }
 
     setMessages([{ role: 'assistant', content: greeting }])
   }, [])

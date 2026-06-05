@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { launchConfetti } from '../hooks/useConfetti'
 import { getProgram, getPhaseExercises } from '../data/programs'
 
 // ── MODAL EXERCICE ────────────────────────────────────────────────────────────
-function ExerciseModal({ exercise, onClose, onComplete }) {
+function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
   const [stepIndex, setStepIndex] = useState(-1)
   const [timer, setTimer] = useState(0)
   const [running, setRunning] = useState(false)
@@ -43,7 +44,6 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
 
   function handleMood(m) {
     setMood(m)
-    setTimeout(() => onComplete(m), 500)
   }
 
   // Lance les confettis quand l'exercice est terminé
@@ -146,7 +146,7 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
             </div>
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', marginBottom: 16 }}>Comment tu te sens après cet exercice ?</div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
                 {[
                   { emoji: '😐', label: 'Neutre' },
                   { emoji: '😊', label: 'Bien' },
@@ -165,6 +165,20 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
                   </button>
                 ))}
               </div>
+
+              {mood && (
+                <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <button className="btn-primary btn-ripple" onClick={() => onComplete(mood)}>
+                    Terminer ✓
+                  </button>
+                  <button
+                    onClick={() => onDebrief(mood)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-card)', border: '1.5px solid var(--primary)', color: 'var(--primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    💬 En parler avec Alex
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -176,6 +190,7 @@ function ExerciseModal({ exercise, onClose, onComplete }) {
 // ── PAGE EXERCICES ────────────────────────────────────────────────────────────
 export default function Exercises() {
   const { user, profile, refreshProfile } = useAuth()
+  const navigate = useNavigate()
   const [activeExercise, setActiveExercise] = useState(null)
   const [phaseUnlocked, setPhaseUnlocked] = useState(null)
 
@@ -185,8 +200,9 @@ export default function Exercises() {
   // program_phase peut valoir 0 (anciens profils conditionnés) → on ramène à 1
   const currentPhase = Math.min(Math.max(profile?.program_phase || 1, 1), maxPhase)
 
-  async function handleComplete(mood) {
-    if (!user || !activeExercise) return
+  // Persiste la séance (XP, streak, progression de phase). Renvoie le titre de l'exercice.
+  async function saveSession(mood) {
+    if (!user || !activeExercise) return null
     const ex = activeExercise
 
     await supabase.from('sessions').insert({
@@ -199,7 +215,6 @@ export default function Exercises() {
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1)
     const newStreak = lastDate === today ? profile.streak : lastDate === yesterday.toDateString() ? profile.streak + 1 : 1
 
-    // Exercices de la phase courante
     const phaseExerciseIds = getPhaseExercises(program, currentPhase).map(e => e.id)
     const { count } = await supabase.from('sessions').select('id', { count: 'exact', head: true })
       .eq('user_id', user.id).in('exercise_id', phaseExerciseIds)
@@ -215,8 +230,20 @@ export default function Exercises() {
     }).eq('id', user.id)
 
     await refreshProfile()
+    return { title: ex.title, shouldAdvancePhase, nextPhase: currentPhase + 1 }
+  }
+
+  async function handleComplete(mood) {
+    const res = await saveSession(mood)
     setActiveExercise(null)
-    if (shouldAdvancePhase) setPhaseUnlocked(currentPhase + 1)
+    if (res?.shouldAdvancePhase) setPhaseUnlocked(res.nextPhase)
+  }
+
+  // Termine la séance puis emmène vers Alex pour en débriefer
+  async function handleDebrief(mood) {
+    const res = await saveSession(mood)
+    setActiveExercise(null)
+    navigate('/coach', { state: { debrief: res?.title } })
   }
 
   if (!profile) return null
@@ -348,6 +375,7 @@ export default function Exercises() {
           exercise={activeExercise}
           onClose={() => setActiveExercise(null)}
           onComplete={handleComplete}
+          onDebrief={handleDebrief}
         />
       )}
     </div>

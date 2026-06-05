@@ -287,6 +287,31 @@ export default function Home() {
           </div>
         </div>
 
+        {/* ── REPRISE EN DOUCEUR (streak cassé) ────────────────────────── */}
+        {streak === 0 && (profile.xp || 0) > 0 && !todayDone && (
+          <div style={{
+            background: 'var(--primary-light)',
+            border: '1.5px solid var(--primary)',
+            borderRadius: 16,
+            padding: '14px 18px',
+            marginBottom: 16,
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{ fontSize: 24 }}>🤗</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)' }}>On reprend en douceur ?</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>Une pause arrive à tout le monde. Alex t'aide à repartir.</div>
+            </div>
+            <button
+              onClick={() => navigate('/coach', { state: { reengage: true } })}
+              className="btn-ripple"
+              style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+            >
+              En parler
+            </button>
+          </div>
+        )}
+
         {/* ── CHECK-IN HEBDO ───────────────────────────────────────────── */}
         <div style={{
           background: 'var(--accent-light)',
