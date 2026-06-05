@@ -126,13 +126,17 @@ function AppRoutes() {
     </div>
   )
 
-  if (!user) return (
-    <Routes>
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="*" element={<Navigate to="/onboarding" replace />} />
-    </Routes>
-  )
+  if (!user) {
+    // Visiteur déjà venu sur cet appareil → connexion directe. Nouveau → questionnaire.
+    const returning = localStorage.getItem('duramen_returning') === '1'
+    return (
+      <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="*" element={<Navigate to={returning ? '/auth' : '/onboarding'} replace />} />
+      </Routes>
+    )
+  }
 
   if (!profile?.onboarding_completed) return (
     <Routes>
