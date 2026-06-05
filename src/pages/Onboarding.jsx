@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 
@@ -51,11 +52,11 @@ const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6']
 
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth()
+  const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [microFeedback, setMicroFeedback] = useState(null)
   const [fadeKey, setFadeKey] = useState(0)
-  const [emailInput, setEmailInput] = useState('')
   const [loading, setLoading] = useState(false)
 
   const step = STEPS[stepIndex]
@@ -82,32 +83,37 @@ export default function Onboarding() {
     }
   }
 
-  async function handleFinish(email) {
-    setLoading(true)
-    const profileType = answers.profile_type || 'cognitive'
-    const isConditioned = profileType === 'conditioned'
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
-      email: email || user.email,
-      profile_type: profileType,
-      cost: answers.cost,
-      desire: answers.desire,
-      duration: answers.duration,
-      daily_minutes: answers.daily_minutes || 10,
-      situation: answers.situation || 'single',
-      level: 1,
-      program_week: 1,
-      program_phase: isConditioned ? 0 : 1,
-      flag_conditioned_high: isConditioned,
-      flag_conditioned_moderate: false,
-      streak: 0,
-      streak_last_date: null,
-      xp: 0,
-      onboarding_completed: true,
-      created_at: new Date().toISOString(),
-    })
-    if (!error) await refreshProfile()
-    setLoading(false)
+  async function handleFinish() {
+    // Si déjà connecté (reset diagnostic) → sauvegarder directement
+    if (user) {
+      setLoading(true)
+      const profileType = answers.profile_type || 'cognitive'
+      const isConditioned = profileType === 'conditioned'
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        profile_type: profileType,
+        cost: answers.cost,
+        desire: answers.desire,
+        duration: answers.duration,
+        daily_minutes: answers.daily_minutes || 10,
+        situation: answers.situation || 'single',
+        level: 1,
+        program_week: 1,
+        program_phase: isConditioned ? 0 : 1,
+        flag_conditioned_high: isConditioned,
+        flag_conditioned_moderate: false,
+        streak: 0, streak_last_date: null, xp: 0,
+        onboarding_completed: true,
+        created_at: new Date().toISOString(),
+      })
+      await refreshProfile()
+      setLoading(false)
+    } else {
+      // Pas encore connecté → sauvegarder en session et aller vers Auth
+      sessionStorage.setItem('duramen_onboarding', JSON.stringify(answers))
+      navigate('/auth')
+    }
   }
 
   // ── INTRO ───────────────────────────────────────────────────────────────────
@@ -209,11 +215,11 @@ export default function Onboarding() {
         </p>
 
         {/* BLOC 5 — CTA */}
-        <button className="btn-primary" onClick={() => handleFinish(null)} disabled={loading} style={{ padding: '16px', fontSize: 15, marginBottom: 12 }}>
-          {loading ? <span className="spinner"></span> : 'Commencer mon programme →'}
+        <button className="btn-primary" onClick={handleFinish} disabled={loading} style={{ padding: '16px', fontSize: 15, marginBottom: 12 }}>
+          {loading ? <span className="spinner"></span> : user ? 'Commencer mon programme →' : 'Créer mon compte gratuit →'}
         </button>
         <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)' }}>
-          ✓ Programme personnalisé · ✓ Coach IA inclus · ✓ Résultats en 4 semaines
+          ✓ Gratuit pour commencer · ✓ Sans carte bancaire · ✓ Résultats en 4 semaines
         </div>
       </div>
     )

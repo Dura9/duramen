@@ -70,8 +70,39 @@ function ResetPasswordScreen() {
 }
 
 function AppRoutes() {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, refreshProfile } = useAuth()
   const [isPasswordReset, setIsPasswordReset] = useState(false)
+
+  // Après inscription : sauvegarder les réponses du questionnaire
+  useEffect(() => {
+    if (!user) return
+    const saved = sessionStorage.getItem('duramen_onboarding')
+    if (!saved) return
+    const answers = JSON.parse(saved)
+    const profileType = answers.profile_type || 'cognitive'
+    const isConditioned = profileType === 'conditioned'
+    supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      profile_type: profileType,
+      cost: answers.cost,
+      desire: answers.desire,
+      duration: answers.duration,
+      daily_minutes: answers.daily_minutes || 10,
+      situation: answers.situation || 'single',
+      level: 1,
+      program_week: 1,
+      program_phase: isConditioned ? 0 : 1,
+      flag_conditioned_high: isConditioned,
+      flag_conditioned_moderate: false,
+      streak: 0, streak_last_date: null, xp: 0,
+      onboarding_completed: true,
+      created_at: new Date().toISOString(),
+    }).then(() => {
+      sessionStorage.removeItem('duramen_onboarding')
+      refreshProfile()
+    })
+  }, [user])
 
   useEffect(() => {
     // Détecter si l'URL contient un token de reset Supabase
@@ -97,8 +128,9 @@ function AppRoutes() {
 
   if (!user) return (
     <Routes>
+      <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="*" element={<Navigate to="/auth" replace />} />
+      <Route path="*" element={<Navigate to="/onboarding" replace />} />
     </Routes>
   )
 
