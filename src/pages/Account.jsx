@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import { useLang } from '../i18n/LanguageContext'
 import FeedbackCard from '../components/FeedbackCard'
 
 function Section({ title, children }) {
@@ -48,6 +49,7 @@ function Row({ icon, label, value, onClick, danger, last }) {
 export default function Account() {
   const { user, profile, refreshProfile } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
+  const { lang, setLang } = useLang()
   const navigate = useNavigate()
 
   const [modal, setModal] = useState(null) // 'email' | 'password' | 'name' | null
@@ -192,6 +194,27 @@ export default function Account() {
               }} />
             </div>
           </button>
+
+          {/* Langue */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🌍</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{lang === 'fr' ? 'Langue' : 'Language'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{lang === 'fr' ? 'Français' : 'English'}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 20, padding: 3, flexShrink: 0 }}>
+              {['fr', 'en'].map(l => (
+                <button key={l} onClick={() => setLang(l)}
+                  style={{
+                    border: 'none', borderRadius: 16, padding: '5px 11px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                    background: lang === l ? 'var(--primary)' : 'transparent',
+                    color: lang === l ? '#fff' : 'var(--text-muted)', transition: 'all 0.15s',
+                  }}>
+                  {l === 'fr' ? '🇫🇷' : '🇬🇧'}
+                </button>
+              ))}
+            </div>
+          </div>
         </Section>
 
         {/* ── FEEDBACK ─────────────────────────────────────────────────── */}
