@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts'
 import { getProgram } from '../data/programs'
+import { useLang } from '../i18n/LanguageContext'
 
 const BADGES = [
   { id: 'first_session', icon: '🌱', title: 'Premier pas',   desc: 'Première séance',          condition: (s, p) => s.length >= 1 },
@@ -20,6 +21,7 @@ const MOOD_MAP = { '😐': 1, '😊': 2, '😄': 3 }
 
 export default function Progress() {
   const { profile } = useAuth()
+  const { lang } = useLang()
   const [sessions, setSessions] = useState([])
   const [weekData, setWeekData] = useState([])
 
@@ -61,7 +63,7 @@ export default function Progress() {
     { icon: '🏅', val: `${earnedBadges.length}/${BADGES.length}`, lbl: 'Badges', color: '#7c6f4a' },
   ]
 
-  const program = getProgram(profile.profile_type)
+  const program = getProgram(profile.profile_type, lang)
   const phaseCount = program.phases.length
   const currentPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
 

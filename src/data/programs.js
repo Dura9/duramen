@@ -382,18 +382,22 @@ export const PROGRAMS = {
   },
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-export function getProgram(profileType) {
-  return PROGRAMS[profileType] || PROGRAMS.cognitive
+// ─── HELPERS (bilingue) ───────────────────────────────────────────────────────
+import { LIBRARY_EN, PROGRAMS_EN } from './programs.en'
+
+export function getProgram(profileType, lang = 'fr') {
+  const set = lang === 'en' ? PROGRAMS_EN : PROGRAMS
+  return set[profileType] || set.cognitive
 }
 
 // Retourne la liste à plat des exercices d'une phase, enrichis (couleur, niveau, n° phase)
-export function getPhaseExercises(program, phaseNumber) {
+export function getPhaseExercises(program, phaseNumber, lang = 'fr') {
   const phase = program.phases.find(p => p.n === phaseNumber)
   if (!phase) return []
+  const lib = lang === 'en' ? LIBRARY_EN : EXERCISE_LIBRARY
   const color = PALETTE[(phaseNumber - 1) % PALETTE.length]
-  return phase.exercises.map((exId, i) => ({
-    ...EXERCISE_LIBRARY[exId],
+  return phase.exercises.map((exId) => ({
+    ...lib[exId],
     phase: phaseNumber,
     level: phaseNumber,
     color,

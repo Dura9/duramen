@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 import { getProgram, getPhaseExercises } from '../data/programs'
+import { useLang } from '../i18n/LanguageContext'
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
 const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
@@ -42,6 +43,7 @@ function getStreakMessage(streak) {
 export default function Home() {
   const { user, profile, refreshProfile } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
+  const { lang } = useLang()
   const navigate = useNavigate()
   const [weekSessions, setWeekSessions] = useState([])
   const [todayDone, setTodayDone] = useState(false)
@@ -99,10 +101,10 @@ export default function Home() {
   const streak = profile.streak || 0
 
   // Exercice du jour : 1er exercice de la phase courante du programme du profil
-  const program = getProgram(profile.profile_type)
+  const program = getProgram(profile.profile_type, lang)
   const phaseCount = program.phases.length
   const curPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
-  const phaseExos = getPhaseExercises(program, curPhase)
+  const phaseExos = getPhaseExercises(program, curPhase, lang)
   const todayExo = phaseExos[(streak) % phaseExos.length] || phaseExos[0]
   const { msg: streakMsg, sub: streakSub } = getStreakMessage(streak)
   const xpPerLevel = 200

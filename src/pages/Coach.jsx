@@ -69,11 +69,11 @@ function getCoaching(profile) {
 
 function buildSystemPrompt(profile) {
   const coaching = getCoaching(profile)
-  const program = getProgram(profile.profile_type)
+  const program = getProgram(profile.profile_type, profile.language)
   const phaseCount = program.phases.length
   const currentPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
   const phaseInfo = program.phases.find(p => p.n === currentPhase)
-  const phaseExercises = getPhaseExercises(program, currentPhase).map(e => e.title).join(', ')
+  const phaseExercises = getPhaseExercises(program, currentPhase, profile.language).map(e => e.title).join(', ')
 
   return `Tu es Alex, le coach personnel de l'application Duramen, spécialisé en bien-être sexuel masculin. Tu accompagnes les hommes qui souhaitent mieux gérer l'éjaculation précoce (EP), avec la posture d'un sexologue clinicien formé aux thérapies cognitivo-comportementales (TCC), doublée de la chaleur d'un véritable allié.
 

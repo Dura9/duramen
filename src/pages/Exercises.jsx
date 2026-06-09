@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { launchConfetti } from '../hooks/useConfetti'
 import { getProgram, getPhaseExercises } from '../data/programs'
+import { useLang } from '../i18n/LanguageContext'
 import { track } from '../lib/analytics'
 
 // ── MODAL EXERCICE ────────────────────────────────────────────────────────────
@@ -191,11 +192,12 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
 // ── PAGE EXERCICES ────────────────────────────────────────────────────────────
 export default function Exercises() {
   const { user, profile, refreshProfile } = useAuth()
+  const { lang } = useLang()
   const navigate = useNavigate()
   const [activeExercise, setActiveExercise] = useState(null)
   const [phaseUnlocked, setPhaseUnlocked] = useState(null)
 
-  const program = getProgram(profile?.profile_type)
+  const program = getProgram(profile?.profile_type, lang)
   const maxPhase = program.phases.length
   const SESSIONS_PER_PHASE = 2 // séances pour débloquer la phase suivante (réduit pour la phase de test — repasser à 4 pour le lancement réel)
   // program_phase peut valoir 0 (anciens profils conditionnés) → on ramène à 1
@@ -217,7 +219,7 @@ export default function Exercises() {
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1)
     const newStreak = lastDate === today ? profile.streak : lastDate === yesterday.toDateString() ? profile.streak + 1 : 1
 
-    const phaseExerciseIds = getPhaseExercises(program, currentPhase).map(e => e.id)
+    const phaseExerciseIds = getPhaseExercises(program, currentPhase, lang).map(e => e.id)
     const { count } = await supabase.from('sessions').select('id', { count: 'exact', head: true })
       .eq('user_id', user.id).in('exercise_id', phaseExerciseIds)
 
@@ -286,7 +288,7 @@ export default function Exercises() {
 
       <div style={{ padding: '0 20px' }}>
         {program.phases.map(ph => {
-          const phaseExercises = getPhaseExercises(program, ph.n)
+          const phaseExercises = getPhaseExercises(program, ph.n, lang)
           const isLocked   = ph.n > currentPhase
           const isDone     = ph.n < currentPhase
           const isCurrent  = ph.n === currentPhase
