@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useLang } from '../i18n/LanguageContext'
 import { track } from '../lib/analytics'
 
 // ─── DONNÉES PROFIL ───────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6']
 
 export default function Onboarding() {
   const { user, refreshProfile } = useAuth()
+  const { t, lang, setLang } = useLang()
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -129,28 +131,44 @@ export default function Onboarding() {
 
   // ── INTRO ───────────────────────────────────────────────────────────────────
   if (step === 'intro') return (
-    <div key={fadeKey} className="fade-in" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 28px', background: 'var(--bg)' }}>
+    <div key={fadeKey} className="fade-in" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '48px 28px', background: 'var(--bg)', position: 'relative' }}>
+
+      {/* Sélecteur de langue FR/EN */}
+      <div style={{ position: 'absolute', top: 'calc(20px + env(safe-area-inset-top, 0px))', right: 20, display: 'flex', gap: 4, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 20, padding: 3 }}>
+        {['fr', 'en'].map(l => (
+          <button key={l} onClick={() => setLang(l)}
+            style={{
+              border: 'none', borderRadius: 16, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              background: lang === l ? 'var(--primary)' : 'transparent',
+              color: lang === l ? '#fff' : 'var(--text-muted)',
+              transition: 'all 0.15s',
+            }}>
+            {l === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
+          </button>
+        ))}
+      </div>
+
       <div style={{ textAlign: 'center', marginBottom: 48 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--primary)', fontWeight: 400, marginBottom: 32 }}>Duramen</div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 500, color: 'var(--text)', lineHeight: 1.35, marginBottom: 16 }}>
-          Ce que tu vis a un nom.<br/>Et une solution.
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 500, color: 'var(--text)', lineHeight: 1.35, marginBottom: 16, whiteSpace: 'pre-line' }}>
+          {t('intro_title')}
         </h1>
         <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 12 }}>
-          2 minutes pour comprendre ton profil et découvrir ce qui va vraiment changer les choses pour toi.
+          {t('intro_subtitle')}
         </p>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
-          1 homme sur 3 vit la même chose. Presque aucun n'en parle.
+          {t('intro_stat')}
         </p>
       </div>
       <button className="btn-primary" onClick={goNext} style={{ fontSize: 16, padding: '16px' }}>
-        Découvrir mon profil →
+        {t('intro_cta')}
       </button>
       {!user && (
         <button
           onClick={() => navigate('/auth')}
           style={{ marginTop: 20, background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer', textAlign: 'center' }}
         >
-          J'ai déjà un compte · <span style={{ color: 'var(--primary)', fontWeight: 500 }}>Se connecter</span>
+          {t('intro_have_account')} · <span style={{ color: 'var(--primary)', fontWeight: 500 }}>{t('intro_login')}</span>
         </button>
       )}
     </div>

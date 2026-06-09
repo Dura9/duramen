@@ -2,19 +2,21 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useLang } from '../i18n/LanguageContext'
 
 const TABS = [
-  { path: '/',           icon: 'ti-home',           label: 'Accueil'   },
-  { path: '/exercises',  icon: 'ti-barbell',         label: 'Exercices' },
-  { path: '/coach',      icon: 'ti-message-circle',  label: 'Coach'     },
-  { path: '/progress',   icon: 'ti-chart-bar',       label: 'Progrès'   },
-  { path: '/account',    icon: 'ti-user-circle',     label: 'Compte'    },
+  { path: '/',           icon: 'ti-home',           key: 'nav_home'      },
+  { path: '/exercises',  icon: 'ti-barbell',         key: 'nav_exercises' },
+  { path: '/coach',      icon: 'ti-message-circle',  key: 'nav_coach'     },
+  { path: '/progress',   icon: 'ti-chart-bar',       key: 'nav_progress'  },
+  { path: '/account',    icon: 'ti-user-circle',     key: 'nav_account'   },
 ]
 
 export default function BottomNav() {
   const location  = useLocation()
   const navigate  = useNavigate()
   const { user }  = useAuth()
+  const { t }     = useLang()
   const [todayDone, setTodayDone] = useState(false)
   const [bouncing, setBouncing]   = useState(null)
 
@@ -106,7 +108,7 @@ export default function BottomNav() {
                 transition: 'all 0.2s',
                 letterSpacing: active ? '0.2px' : 0,
               }}>
-                {tab.label}
+                {t(tab.key)}
               </span>
 
               {/* Point indicateur sous le label */}
