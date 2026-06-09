@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         'X-Title': 'Duramen',
       },
       body: JSON.stringify({
-        model: model || 'google/gemma-4-31b-it:free',
+        model: model || 'anthropic/claude-3.5-haiku',
         messages,
         max_tokens: max_tokens || 600,
         temperature: temperature || 0.7,

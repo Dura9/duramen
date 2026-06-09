@@ -188,7 +188,7 @@ export default function Coach() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'google/gemma-4-31b-it:free',
+          model: 'anthropic/claude-3.5-haiku',
           messages: [
             { role: 'system', content: buildSystemPrompt(profile) },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
