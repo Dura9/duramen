@@ -140,6 +140,10 @@ export default function Account() {
         <Section title="Notifications">
           <button
             onClick={async () => {
+              if (typeof Notification === 'undefined') {
+                alert('Ton appareil ne supporte pas les notifications dans ce navigateur. Sur iPhone, ajoute d\'abord l\'app à ton écran d\'accueil.')
+                return
+              }
               localStorage.removeItem('duramen_push_dismissed')
               if (Notification.permission === 'denied') {
                 alert('Les notifications sont bloquées dans ton navigateur. Va dans les réglages de ton navigateur pour les autoriser pour ce site.')
@@ -153,7 +157,7 @@ export default function Account() {
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Rappel quotidien</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {Notification.permission === 'granted' ? 'Notifications activées ✓' : 'Appuie pour activer'}
+                {typeof Notification !== 'undefined' && Notification.permission === 'granted' ? 'Notifications activées ✓' : 'Appuie pour activer'}
               </div>
             </div>
             <i className="ti ti-chevron-right" style={{ color: 'var(--text-muted)', fontSize: 16 }}></i>

@@ -230,8 +230,26 @@ export default function Coach() {
 
   const remaining = FREE_LIMIT - msgCount
 
+  // Suivi de la zone visible (gère l'ouverture du clavier mobile)
+  const [viewportH, setViewportH] = useState(null)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const update = () => setViewportH(vv.height)
+    update()
+    vv.addEventListener('resize', update)
+    return () => vv.removeEventListener('resize', update)
+  }, [])
+  const keyboardOpen = viewportH != null && viewportH < window.innerHeight - 120
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg)', paddingBottom: 'calc(70px + env(safe-area-inset-bottom, 0px))' }}>
+    <div style={{
+      display: 'flex', flexDirection: 'column',
+      height: viewportH ? `${viewportH}px` : '100dvh',
+      background: 'var(--bg)',
+      paddingBottom: keyboardOpen ? 0 : 'calc(70px + env(safe-area-inset-bottom, 0px))',
+      transition: 'height 0.15s ease',
+    }}>
 
       {/* ── HEADER GRADIENT ──────────────────────────────────────────── */}
       <div style={{
