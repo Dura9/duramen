@@ -89,6 +89,7 @@ function AppRoutes() {
     supabase.from('profiles').upsert({
       id: user.id,
       email: user.email,
+      language: answers.language || 'fr',
       profile_type: profileType,
       cost: answers.cost,
       desire: answers.desire,
