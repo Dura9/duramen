@@ -6,32 +6,60 @@ import { useTheme } from '../hooks/useTheme'
 import { getProgram, getPhaseExercises } from '../data/programs'
 import { useLang } from '../i18n/LanguageContext'
 
-const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' }
-const DAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+const LEVEL_LABELS = {
+  fr: { 1: 'Débutant', 2: 'En éveil', 3: 'En progression', 4: 'En contrôle', 5: 'Maître de soi' },
+  en: { 1: 'Beginner', 2: 'Awakening', 3: 'Progressing', 4: 'In control', 5: 'Self-master' },
+}
+const DAYS = { fr: ['L', 'M', 'M', 'J', 'V', 'S', 'D'], en: ['M', 'T', 'W', 'T', 'F', 'S', 'S'] }
 
-const QUOTES = [
-  "La régularité bat la perfection. Chaque séance compte.",
-  "Le contrôle se construit jour après jour, pas en une nuit.",
-  "Ce que tu fais aujourd'hui définit qui tu seras demain.",
-  "La discipline est la forme la plus haute de l'amour propre.",
-  "Un petit progrès chaque jour mène à de grands résultats.",
-  "La maîtrise de soi commence par un choix quotidien.",
-  "Tu es plus fort que tu ne le crois.",
-]
+const QUOTES = {
+  fr: [
+    "La régularité bat la perfection. Chaque séance compte.",
+    "Le contrôle se construit jour après jour, pas en une nuit.",
+    "Ce que tu fais aujourd'hui définit qui tu seras demain.",
+    "La discipline est la forme la plus haute de l'amour propre.",
+    "Un petit progrès chaque jour mène à de grands résultats.",
+    "La maîtrise de soi commence par un choix quotidien.",
+    "Tu es plus fort que tu ne le crois.",
+  ],
+  en: [
+    "Consistency beats perfection. Every session counts.",
+    "Control is built day by day, not overnight.",
+    "What you do today defines who you'll be tomorrow.",
+    "Discipline is the highest form of self-respect.",
+    "A little progress each day leads to big results.",
+    "Self-mastery starts with a daily choice.",
+    "You're stronger than you think.",
+  ],
+}
 
-function getGreeting(firstName) {
+function getGreeting(firstName, lang) {
   const h = new Date().getHours()
+  if (lang === 'en') {
+    if (h < 12) return `Good morning, ${firstName} ☀️`
+    if (h < 18) return `Good afternoon, ${firstName} 👋`
+    return `Good evening, ${firstName} 🌙`
+  }
   if (h < 12) return `Bonjour, ${firstName} ☀️`
   if (h < 18) return `Bon après-midi, ${firstName} 👋`
   return `Bonsoir, ${firstName} 🌙`
 }
 
-function getTodayQuote() {
-  const day = new Date().getDay()
-  return QUOTES[day % QUOTES.length]
+function getTodayQuote(lang) {
+  const list = QUOTES[lang] || QUOTES.fr
+  return list[new Date().getDay() % list.length]
 }
 
-function getStreakMessage(streak) {
+function getStreakMessage(streak, lang) {
+  const d = lang === 'en' ? 'days' : 'jours'
+  if (lang === 'en') {
+    if (streak === 0) return { msg: 'Start your first session', sub: 'The first step is the most important' }
+    if (streak < 3) return { msg: 'Good start!', sub: 'Keep the momentum going' }
+    if (streak < 7) return { msg: 'Nice consistency!', sub: `${streak} days without missing` }
+    if (streak < 14) return { msg: 'You\'re on fire 🔥', sub: `${streak} days in a row` }
+    if (streak < 30) return { msg: 'Impressive!', sub: `${streak} days — you're in the top 10%` }
+    return { msg: 'Legendary 🏆', sub: `${streak} days — you're an inspiration` }
+  }
   if (streak === 0) return { msg: 'Lance ta première séance', sub: 'Le premier pas est le plus important' }
   if (streak < 3) return { msg: 'Bon départ !', sub: 'Continue sur ta lancée' }
   if (streak < 7) return { msg: 'Belle régularité !', sub: `${streak} jours sans faillir` }
@@ -43,7 +71,7 @@ function getStreakMessage(streak) {
 export default function Home() {
   const { user, profile, refreshProfile } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
-  const { lang } = useLang()
+  const { lang, t } = useLang()
   const navigate = useNavigate()
   const [weekSessions, setWeekSessions] = useState([])
   const [todayDone, setTodayDone] = useState(false)
@@ -89,7 +117,7 @@ export default function Home() {
   const weekDays = (() => {
     const today = new Date()
     const dayOfWeek = (today.getDay() + 6) % 7
-    return DAYS.map((d, i) => ({
+    return (DAYS[lang] || DAYS.fr).map((d, i) => ({
       label: d,
       done: weekSessions.includes((i + 1) % 7),
       isToday: i === dayOfWeek,
@@ -106,7 +134,7 @@ export default function Home() {
   const curPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
   const phaseExos = getPhaseExercises(program, curPhase, lang)
   const todayExo = phaseExos[(streak) % phaseExos.length] || phaseExos[0]
-  const { msg: streakMsg, sub: streakSub } = getStreakMessage(streak)
+  const { msg: streakMsg, sub: streakSub } = getStreakMessage(streak, lang)
   const xpPerLevel = 200
   const xpCurrent = (profile.xp || 0) % xpPerLevel
   const xpLevel = Math.floor((profile.xp || 0) / xpPerLevel) + 1
@@ -141,13 +169,13 @@ export default function Home() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative' }}>
           <div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>
-              Semaine {profile.program_week} · Phase {profile.program_phase}
+              {t('home_week')} {profile.program_week} · {t('home_phase')} {profile.program_phase}
             </div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, lineHeight: 1.2 }}>
-              {getGreeting(profile.first_name)}
+              {getGreeting(profile.first_name, lang)}
             </h1>
             <span style={{ display: 'inline-block', marginTop: 8, fontSize: 12, background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)', padding: '3px 10px', borderRadius: 20, fontWeight: 500 }}>
-              {LEVEL_LABELS[profile.level] || 'Débutant'}
+              {(LEVEL_LABELS[lang] || LEVEL_LABELS.fr)[profile.level] || (LEVEL_LABELS[lang] || LEVEL_LABELS.fr)[1]}
             </span>
           </div>
           <button
@@ -162,7 +190,7 @@ export default function Home() {
         {/* Barre XP */}
         <div style={{ marginTop: 20, position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.6)', marginBottom: 6 }}>
-            <span>Niveau {xpLevel}</span>
+            <span>{t('home_level')} {xpLevel}</span>
             <span>{xpCurrent} / {xpPerLevel} XP</span>
           </div>
           <div style={{ height: 5, background: 'rgba(255,255,255,0.2)', borderRadius: 4, overflow: 'hidden' }}>
@@ -195,9 +223,9 @@ export default function Home() {
             {streak === 0 ? '🌱' : streak < 7 ? '🔥' : streak < 14 ? '⚡' : '🏆'}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 2 }}>Série en cours</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 2 }}>{t('home_streakLabel')}</div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', fontWeight: 500 }}>
-              {streak} jour{streak > 1 ? 's' : ''}
+              {streak} {streak > 1 ? t('home_days') : t('home_day')}
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{streakMsg} — {streakSub}</div>
           </div>
@@ -206,9 +234,9 @@ export default function Home() {
         {/* ── SEMAINE ──────────────────────────────────────────────────── */}
         <div className="card" style={{ marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span className="section-label" style={{ margin: 0 }}>Cette semaine</span>
+            <span className="section-label" style={{ margin: 0 }}>{t('home_thisWeek')}</span>
             <span style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 500 }}>
-              {weekSessions.length} séance{weekSessions.length > 1 ? 's' : ''}
+              {weekSessions.length} {weekSessions.length > 1 ? t('home_sessions') : t('home_session')}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -232,7 +260,7 @@ export default function Home() {
         </div>
 
         {/* ── EXERCICE DU JOUR ─────────────────────────────────────────── */}
-        <div className="section-label">Exercice du jour</div>
+        <div className="section-label">{t('home_todayExercise')}</div>
         <div
           onClick={() => !todayDone && navigate('/exercises')}
           style={{
@@ -270,14 +298,14 @@ export default function Home() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 16, fontWeight: 600, color: todayDone ? 'var(--text)' : '#fff', marginBottom: 4 }}>
-                {todayExo?.title || 'Ta séance du jour'}
+                {todayExo?.title || t('home_yourSession')}
               </div>
               <div style={{ fontSize: 13, color: todayDone ? 'var(--text-muted)' : 'rgba(255,255,255,0.7)' }}>
-                {todayExo ? `${todayExo.duration} · ${todayExo.subtitle}` : 'Programme personnalisé'}
+                {todayExo ? `${todayExo.duration} · ${todayExo.subtitle}` : t('home_personalizedProgram')}
               </div>
             </div>
             {todayDone ? (
-              <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600, flexShrink: 0 }}>Fait ✓</span>
+              <span style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600, flexShrink: 0 }}>{t('home_done')}</span>
             ) : (
               <div style={{
                 background: 'rgba(255,255,255,0.2)', borderRadius: 10,
@@ -301,15 +329,15 @@ export default function Home() {
           }}>
             <div style={{ fontSize: 24 }}>🤗</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)' }}>On reprend en douceur ?</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>Une pause arrive à tout le monde. Alex t'aide à repartir.</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)' }}>{t('home_reengageTitle')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{t('home_reengageSub')}</div>
             </div>
             <button
               onClick={() => navigate('/coach', { state: { reengage: true } })}
               className="btn-ripple"
               style={{ background: 'var(--primary)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
             >
-              En parler
+              {t('home_talk')}
             </button>
           </div>
         )}
@@ -325,15 +353,15 @@ export default function Home() {
         }}>
           <div style={{ fontSize: 22 }}>📅</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00' }}>Check-in hebdomadaire</div>
-            <div style={{ fontSize: 12, color: '#9a7a20', marginTop: 1 }}>Alex t'attend pour ton bilan</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00' }}>{t('home_checkinTitle')}</div>
+            <div style={{ fontSize: 12, color: '#9a7a20', marginTop: 1 }}>{t('home_checkinSub')}</div>
           </div>
           <button
             onClick={() => navigate('/coach', { state: { checkin: true } })}
             className="btn-ripple"
           style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
           >
-            Démarrer
+            {t('home_start')}
           </button>
         </div>
 
@@ -345,7 +373,7 @@ export default function Home() {
         }}>
           <div style={{ fontSize: 18, color: 'var(--border)', marginBottom: 8, lineHeight: 1 }}>"</div>
           <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, fontStyle: 'italic' }}>
-            {getTodayQuote()}
+            {getTodayQuote(lang)}
           </p>
         </div>
 
