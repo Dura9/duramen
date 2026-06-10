@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { getProgram, getPhaseExercises } from '../data/programs'
+import { useLang } from '../i18n/LanguageContext'
 import { track } from '../lib/analytics'
 
 const LEVEL_LABELS = { 1: 'Débutant', 2: 'En éveil', 3: 'En progression' }
@@ -12,54 +13,44 @@ const FREE_LIMIT = 20
 // Pour chaque profil : la posture thérapeutique d'Alex + ses suggestions de départ.
 const PROFILE_COACHING = {
   sensory: {
-    name: 'Hyperexcité Sensoriel',
+    name: { fr: 'Hyperexcité Sensoriel', en: 'Sensory Hyperarousal' },
     focus: 'Ce profil perçoit mal sa montée d\'excitation et a un seuil éjaculatoire bas. Concentre-toi sur la conscience interoceptive (échelle d\'excitation 0-10), la reconnaissance du point de non-retour, le stop-start et le renforcement du plancher pelvien.',
-    quick: [
-      'Comment reconnaître mon point de non-retour ?',
-      'Sur le moment, je vais trop vite — que faire ?',
-      'Le stop-start ne marche pas encore pour moi',
-      'Comment bien faire mes Kegel ?',
-    ],
+    quick: {
+      fr: ['Comment reconnaître mon point de non-retour ?', 'Sur le moment, je vais trop vite — que faire ?', 'Le stop-start ne marche pas encore pour moi', 'Comment bien faire mes Kegel ?'],
+      en: ['How do I recognize my point of no return?', 'In the moment I go too fast — what do I do?', 'Stop-start isn\'t working for me yet', 'How do I do my Kegels properly?'],
+    },
   },
   cognitive: {
-    name: 'Anxieux de Performance',
+    name: { fr: 'Anxieux de Performance', en: 'Performance Anxiety' },
     focus: 'Ce profil est dominé par l\'anxiété de performance et le "spectatoring" (s\'observer en se jugeant). Utilise les outils de la TCC : repérage des pensées automatiques, restructuration cognitive, recentrage attentionnel sur les sensations, respiration.',
-    quick: [
-      'Je n\'arrête pas de penser pendant l\'acte',
-      'J\'ai peur avant chaque rapport',
-      'Comment arrêter de me juger ?',
-      'Une pensée négative m\'obsède',
-    ],
+    quick: {
+      fr: ['Je n\'arrête pas de penser pendant l\'acte', 'J\'ai peur avant chaque rapport', 'Comment arrêter de me juger ?', 'Une pensée négative m\'obsède'],
+      en: ['I can\'t stop thinking during sex', 'I\'m anxious before every encounter', 'How do I stop judging myself?', 'A negative thought obsesses me'],
+    },
   },
   situational: {
-    name: 'EP Situationnelle',
+    name: { fr: 'EP Situationnelle', en: 'Situational PE' },
     focus: 'Ce profil a une EP variable, dépendante du contexte (nouvelle partenaire, stress, fatigue). Aide à identifier les déclencheurs, à se détendre, à communiquer avec la partenaire et à reprendre confiance par exposition progressive.',
-    quick: [
-      'Ça arrive surtout avec une nouvelle partenaire',
-      'Le stress me bloque complètement',
-      'Comment en parler à ma partenaire ?',
-      'Pourquoi c\'est variable selon les fois ?',
-    ],
+    quick: {
+      fr: ['Ça arrive surtout avec une nouvelle partenaire', 'Le stress me bloque complètement', 'Comment en parler à ma partenaire ?', 'Pourquoi c\'est variable selon les fois ?'],
+      en: ['It mostly happens with a new partner', 'Stress completely blocks me', 'How do I talk to my partner about it?', 'Why does it vary from time to time?'],
+    },
   },
   conditioned: {
-    name: 'EP Conditionnée',
+    name: { fr: 'EP Conditionnée', en: 'Conditioned PE' },
     focus: 'Ce profil a une excitation conditionnée par la pornographie et une masturbation rapide. Aborde le sujet sans aucun jugement, explique le conditionnement neurologique, encourage la réduction PROGRESSIVE (jamais l\'arrêt brutal) et valorise chaque étape du reconditionnement.',
-    quick: [
-      'Comment réduire le porno sans craquer ?',
-      'Je n\'ai du plaisir qu\'avec un écran',
-      'C\'est quoi le reconditionnement ?',
-      'J\'ai rechuté, je culpabilise',
-    ],
+    quick: {
+      fr: ['Comment réduire le porno sans craquer ?', 'Je n\'ai du plaisir qu\'avec un écran', 'C\'est quoi le reconditionnement ?', 'J\'ai rechuté, je culpabilise'],
+      en: ['How do I cut down on porn without relapsing?', 'I only feel pleasure with a screen', 'What is reconditioning?', 'I relapsed, I feel guilty'],
+    },
   },
   primary: {
-    name: 'EP Primaire',
+    name: { fr: 'EP Primaire', en: 'Primary PE' },
     focus: 'Ce profil a une EP présente depuis toujours, avec une probable composante neurobiologique. Pose un cadre réaliste (progression plus longue, 8-16 semaines), valorise la constance, et rappelle qu\'un avis médical (urologue/sexologue) est recommandé en complément.',
-    quick: [
-      'Est-ce que ça peut vraiment changer pour moi ?',
-      'Dois-je consulter un médecin ?',
-      'Pourquoi ça dure depuis toujours ?',
-      'Les exercices marchent-ils sur mon profil ?',
-    ],
+    quick: {
+      fr: ['Est-ce que ça peut vraiment changer pour moi ?', 'Dois-je consulter un médecin ?', 'Pourquoi ça dure depuis toujours ?', 'Les exercices marchent-ils sur mon profil ?'],
+      en: ['Can this really change for me?', 'Should I see a doctor?', 'Why has it always been like this?', 'Do the exercises work for my profile?'],
+    },
   },
 }
 
@@ -81,7 +72,7 @@ function buildSystemPrompt(profile) {
 Tu n'es pas un simple chatbot d'informations. Tu es un ACCOMPAGNANT. Ta mission profonde : créer une alliance de confiance, déculpabiliser, et soutenir la personne jour après jour pour qu'elle aille au bout de son programme. Dans le traitement de l'EP, le vrai défi n'est pas le manque de techniques — c'est l'abandon. Ton rôle est de faire en sorte que ${profile.first_name} ne se sente jamais seul et ait toujours envie de continuer.
 
 ═══ CONTEXTE DE ${profile.first_name?.toUpperCase()} ═══
-- Profil diagnostiqué : ${coaching.name}
+- Profil diagnostiqué : ${coaching.name[profile.language] || coaching.name.fr}
 - Approche thérapeutique : ${program.approach}
 - Phase actuelle : Phase ${currentPhase}/${phaseCount} — ${phaseInfo?.title} (objectif : ${phaseInfo?.focus})
 - Exercices de sa phase en cours : ${phaseExercises}
@@ -126,6 +117,7 @@ ${coaching.focus}
 
 export default function Coach() {
   const { user, profile } = useAuth()
+  const { lang, t } = useLang()
   const location = useLocation()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -140,19 +132,31 @@ export default function Coach() {
     loadTodayCount()
     track('coach_open', { context: location.state?.checkin ? 'checkin' : location.state?.debrief ? 'debrief' : location.state?.reengage ? 'reengage' : 'direct' })
     const streak = profile?.streak || 0
+    const fn = profile?.first_name
+    const profName = coaching.name[lang] || coaching.name.fr
+    const en = lang === 'en'
+
     const streakLine = streak > 0
-      ? `Bravo pour tes ${streak} jour${streak > 1 ? 's' : ''} de suite 🔥 — la régularité, c'est 80 % du travail.`
-      : `Le plus important, c'est de commencer. Chaque petit pas compte.`
+      ? (en ? `Well done on your ${streak} day${streak > 1 ? 's' : ''} in a row 🔥 — consistency is 80% of the work.` : `Bravo pour tes ${streak} jour${streak > 1 ? 's' : ''} de suite 🔥 — la régularité, c'est 80 % du travail.`)
+      : (en ? `What matters most is starting. Every small step counts.` : `Le plus important, c'est de commencer. Chaque petit pas compte.`)
 
     let greeting
     if (location.state?.checkin) {
-      greeting = `Salut ${profile?.first_name} 👋 C'est l'heure de ton bilan de la semaine. Raconte-moi : comment ça s'est passé ? Tu as réussi à faire tes séances, ou ça a été compliqué ? On ajuste ensemble, sans jugement.`
+      greeting = en
+        ? `Hi ${fn} 👋 It's time for your weekly review. Tell me: how did it go? Did you manage your sessions, or was it tough? We'll adjust together, no judgment.`
+        : `Salut ${fn} 👋 C'est l'heure de ton bilan de la semaine. Raconte-moi : comment ça s'est passé ? Tu as réussi à faire tes séances, ou ça a été compliqué ? On ajuste ensemble, sans jugement.`
     } else if (location.state?.debrief) {
-      greeting = `Bravo d'avoir terminé "${location.state.debrief}" 👏 ${streakLine}\n\nDis-moi : comment ça s'est passé ? Qu'est-ce que tu as ressenti pendant l'exercice ? Si quelque chose t'a gêné ou questionné, on en parle.`
+      greeting = en
+        ? `Well done for finishing "${location.state.debrief}" 👏 ${streakLine}\n\nTell me: how did it go? What did you feel during the exercise? If anything bothered or puzzled you, let's talk about it.`
+        : `Bravo d'avoir terminé "${location.state.debrief}" 👏 ${streakLine}\n\nDis-moi : comment ça s'est passé ? Qu'est-ce que tu as ressenti pendant l'exercice ? Si quelque chose t'a gêné ou questionné, on en parle.`
     } else if (location.state?.reengage) {
-      greeting = `Content de te revoir, ${profile?.first_name} 🤗 Une pause, ça arrive à tout le monde — l'important c'est que tu sois là maintenant. On ne repart pas de zéro, on reprend où tu en étais.\n\nQu'est-ce qui t'a fait décrocher ces derniers jours ? Sans culpabiliser — juste pour qu'on trouve ensemble comment t'aider à tenir.`
+      greeting = en
+        ? `Good to see you again, ${fn} 🤗 A break happens to everyone — what matters is that you're here now. We're not starting from zero, we pick up where you left off.\n\nWhat made you drop off these past few days? No guilt — just so we can figure out together how to help you keep going.`
+        : `Content de te revoir, ${fn} 🤗 Une pause, ça arrive à tout le monde — l'important c'est que tu sois là maintenant. On ne repart pas de zéro, on reprend où tu en étais.\n\nQu'est-ce qui t'a fait décrocher ces derniers jours ? Sans culpabiliser — juste pour qu'on trouve ensemble comment t'aider à tenir.`
     } else {
-      greeting = `Salut ${profile?.first_name}, je suis Alex, ton coach personnel 🤝\n\nJe connais ton profil (${coaching.name}) et ton programme. Je suis là pour t'accompagner, répondre à tes questions et t'aider à tenir le cap — surtout les jours où c'est dur.\n\n${streakLine}\n\nDe quoi as-tu envie de parler aujourd'hui ?`
+      greeting = en
+        ? `Hi ${fn}, I'm Alex, your personal coach 🤝\n\nI know your profile (${profName}) and your program. I'm here to support you, answer your questions and help you stay on track — especially on the hard days.\n\n${streakLine}\n\nWhat would you like to talk about today?`
+        : `Salut ${fn}, je suis Alex, ton coach personnel 🤝\n\nJe connais ton profil (${profName}) et ton programme. Je suis là pour t'accompagner, répondre à tes questions et t'aider à tenir le cap — surtout les jours où c'est dur.\n\n${streakLine}\n\nDe quoi as-tu envie de parler aujourd'hui ?`
     }
 
     setMessages([{ role: 'assistant', content: greeting }])
@@ -267,7 +271,7 @@ export default function Coach() {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 17, fontWeight: 600, color: '#fff' }}>Alex</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>Coach Duramen · En ligne</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{t('coach_online')}</div>
           </div>
           <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 20, padding: '5px 12px', fontSize: 12, color: '#fff', fontWeight: 500, flexShrink: 0 }}>
             {remaining} msg
@@ -312,8 +316,8 @@ export default function Coach() {
 
         {remaining === 0 && (
           <div style={{ background: 'var(--accent-light)', border: '1px solid #e8c97a', borderRadius: 14, padding: '14px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00', marginBottom: 4 }}>Limite quotidienne atteinte</div>
-            <div style={{ fontSize: 13, color: '#9a7a20' }}>Tu as utilisé tes {FREE_LIMIT} messages d'aujourd'hui. Reviens demain ! 🌙</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: '#7a5c00', marginBottom: 4 }}>{t('coach_limitTitle')}</div>
+            <div style={{ fontSize: 13, color: '#9a7a20' }}>{t('coach_limitSub')}</div>
           </div>
         )}
 
@@ -324,7 +328,7 @@ export default function Coach() {
       <div style={{ padding: '12px 16px 20px', background: 'var(--bg)', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         {messages.length <= 2 && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-            {coaching.quick.map((q, i) => (
+            {(coaching.quick[lang] || coaching.quick.fr).map((q, i) => (
               <button key={i} onClick={() => send(q)} style={{ fontSize: 12, padding: '7px 13px', border: '1px solid var(--border)', borderRadius: 20, background: 'var(--bg-card)', color: 'var(--primary)', cursor: 'pointer', fontWeight: 500, transition: 'all 0.15s' }}>
                 {q}
               </button>
@@ -338,7 +342,7 @@ export default function Coach() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={remaining === 0 ? 'Limite atteinte pour aujourd\'hui...' : 'Pose une question à Alex...'}
+            placeholder={remaining === 0 ? t('coach_limitPlaceholder') : t('coach_placeholder')}
             disabled={remaining === 0 || loading}
             rows={1}
             style={{

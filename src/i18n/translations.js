@@ -93,6 +93,13 @@ export const translations = {
     pr_statStreak: 'Jours streak', pr_statSessions: 'Séances', pr_statXp: 'XP total', pr_statBadges: 'Badges',
     pr_resetDiagnostic: 'Recommencer le diagnostic',
     pr_resetConfirm: 'Recommencer le questionnaire de diagnostic ? Ton compte restera intact.',
+
+    // ── Coach ──
+    coach_online: 'Coach Duramen · En ligne',
+    coach_placeholder: 'Pose une question à Alex...',
+    coach_limitPlaceholder: 'Limite atteinte pour aujourd\'hui...',
+    coach_limitTitle: 'Limite quotidienne atteinte',
+    coach_limitSub: 'Tu as utilisé tes 20 messages d\'aujourd\'hui. Reviens demain ! 🌙',
   },
 
   en: {
@@ -183,5 +190,12 @@ export const translations = {
     pr_statStreak: 'Streak days', pr_statSessions: 'Sessions', pr_statXp: 'Total XP', pr_statBadges: 'Badges',
     pr_resetDiagnostic: 'Restart the diagnostic',
     pr_resetConfirm: 'Restart the diagnostic questionnaire? Your account will stay intact.',
+
+    // ── Coach ──
+    coach_online: 'Duramen Coach · Online',
+    coach_placeholder: 'Ask Alex a question...',
+    coach_limitPlaceholder: 'Limit reached for today...',
+    coach_limitTitle: 'Daily limit reached',
+    coach_limitSub: 'You\'ve used your 20 messages for today. Come back tomorrow! 🌙',
   },
 }
