@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useLang } from '../i18n/LanguageContext'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY
 
@@ -14,6 +15,7 @@ function urlBase64ToUint8Array(base64String) {
 
 export default function PushPrompt() {
   const { user } = useAuth()
+  const { t } = useLang()
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -78,18 +80,18 @@ export default function PushPrompt() {
       {done ? (
         <div style={{ textAlign: 'center', padding: '8px 0' }}>
           <div style={{ fontSize: 32, marginBottom: 6 }}>🔔</div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Notifications activées !</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Tu recevras un rappel quotidien à 8h.</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('push_doneTitle')}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('push_doneSub')}</div>
         </div>
       ) : (
         <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
           <div style={{ fontSize: 28, flexShrink: 0, marginTop: 2 }}>🔔</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-              Rappel quotidien
+              {t('push_title')}
             </div>
             <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>
-              Reçois une notification chaque matin pour ne jamais manquer ta séance.
+              {t('push_desc')}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button
@@ -97,13 +99,13 @@ export default function PushPrompt() {
                 disabled={loading}
                 style={{ flex: 1, padding: '9px 0', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
               >
-                {loading ? '...' : 'Activer'}
+                {loading ? '...' : t('push_enable')}
               </button>
               <button
                 onClick={handleDismiss}
                 style={{ flex: 1, padding: '9px 0', background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}
               >
-                Plus tard
+                {t('push_later')}
               </button>
             </div>
           </div>

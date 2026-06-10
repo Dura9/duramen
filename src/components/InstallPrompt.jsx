@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLang } from '../i18n/LanguageContext'
 
 function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
@@ -8,6 +9,7 @@ function isIOS() {
 }
 
 export default function InstallPrompt() {
+  const { t } = useLang()
   const [show, setShow] = useState(false)
   const [deferred, setDeferred] = useState(null)
   const [iosMode, setIosMode] = useState(false)
@@ -74,28 +76,28 @@ export default function InstallPrompt() {
         <div style={{ fontSize: 28, flexShrink: 0, marginTop: 2 }}>📲</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-            Installe Duramen
+            {t('install_title')}
           </div>
           {iosMode ? (
             <>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>
-                Appuie sur <i className="ti ti-share" style={{ verticalAlign: 'middle' }}></i> <strong>Partager</strong> en bas de Safari, puis <strong>« Sur l'écran d'accueil »</strong>.
+                {t('install_iosTap')} <i className="ti ti-share" style={{ verticalAlign: 'middle' }}></i> <strong>{t('install_share')}</strong> {t('install_iosThen')} <strong>{t('install_addHome')}</strong>.
               </div>
               <button onClick={dismiss} style={{ width: '100%', padding: '9px 0', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                J'ai compris
+                {t('install_gotIt')}
               </button>
             </>
           ) : (
             <>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>
-                Ajoute l'app à ton écran d'accueil pour un accès rapide, comme une vraie application.
+                {t('install_desc')}
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={handleInstall} style={{ flex: 1, padding: '9px 0', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                  Installer
+                  {t('install_install')}
                 </button>
                 <button onClick={dismiss} style={{ flex: 1, padding: '9px 0', background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>
-                  Plus tard
+                  {t('install_later')}
                 </button>
               </div>
             </>

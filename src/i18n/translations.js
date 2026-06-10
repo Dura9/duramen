@@ -148,6 +148,18 @@ export const translations = {
     fb_title: 'Ton avis sur Duramen', fb_question: 'Comment trouves-tu l\'application ?',
     fb_placeholder: 'Qu\'est-ce qui te plaît ? Qu\'est-ce qui te manque ou te bloque ? (facultatif)',
     fb_send: 'Envoyer mon avis',
+
+    // ── Bannières install + notifications ──
+    install_title: 'Installe Duramen',
+    install_iosTap: 'Appuie sur', install_share: 'Partager',
+    install_iosThen: 'en bas de Safari, puis', install_addHome: '« Sur l\'écran d\'accueil »',
+    install_gotIt: 'J\'ai compris',
+    install_desc: 'Ajoute l\'app à ton écran d\'accueil pour un accès rapide, comme une vraie application.',
+    install_install: 'Installer', install_later: 'Plus tard',
+    push_title: 'Rappel quotidien',
+    push_desc: 'Reçois une notification chaque matin pour ne jamais manquer ta séance.',
+    push_enable: 'Activer', push_later: 'Plus tard',
+    push_doneTitle: 'Notifications activées !', push_doneSub: 'Tu recevras un rappel quotidien à 8h.',
   },
 
   en: {
@@ -293,5 +305,17 @@ export const translations = {
     fb_title: 'Your feedback on Duramen', fb_question: 'How do you find the app?',
     fb_placeholder: 'What do you like? What\'s missing or blocking you? (optional)',
     fb_send: 'Send my feedback',
+
+    // ── Install + notification banners ──
+    install_title: 'Install Duramen',
+    install_iosTap: 'Tap', install_share: 'Share',
+    install_iosThen: 'at the bottom of Safari, then', install_addHome: '"Add to Home Screen"',
+    install_gotIt: 'Got it',
+    install_desc: 'Add the app to your home screen for quick access, like a real app.',
+    install_install: 'Install', install_later: 'Later',
+    push_title: 'Daily reminder',
+    push_desc: 'Get a notification every morning so you never miss your session.',
+    push_enable: 'Enable', push_later: 'Later',
+    push_doneTitle: 'Notifications enabled!', push_doneSub: 'You\'ll get a daily reminder at 8am.',
   },
 }
