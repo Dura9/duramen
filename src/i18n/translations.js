@@ -100,6 +100,23 @@ export const translations = {
     coach_limitPlaceholder: 'Limite atteinte pour aujourd\'hui...',
     coach_limitTitle: 'Limite quotidienne atteinte',
     coach_limitSub: 'Tu as utilisé tes 20 messages d\'aujourd\'hui. Reviens demain ! 🌙',
+
+    // ── Auth ──
+    auth_taglineLogin: 'Reprends le contrôle, en confiance.',
+    auth_taglineRegister: 'Crée ton espace personnel',
+    auth_login: 'Connexion', auth_register: 'Créer un compte', auth_forgot: 'Mot de passe oublié',
+    auth_email: 'Email', auth_password: 'Mot de passe', auth_passwordMin: 'Minimum 6 caractères',
+    auth_forgotQ: 'Mot de passe oublié ?',
+    auth_signin: 'Se connecter', auth_createAccount: 'Créer mon compte', auth_sendReset: 'Envoyer le lien de réinitialisation',
+    auth_backToLogin: '← Retour à la connexion',
+    auth_noAccount: 'Pas encore de compte ? S\'inscrire',
+    auth_haveAccount: 'Déjà un compte ? Se connecter',
+    auth_legalPre: 'En t\'inscrivant, tu acceptes nos', auth_terms: 'conditions d\'utilisation',
+    auth_and: 'et notre', auth_privacy: 'politique de confidentialité',
+    auth_adults: 'Cette application est réservée aux adultes (+18 ans).',
+    auth_regCheckEmail: 'Vérifie ton email pour confirmer ton compte.',
+    auth_resetSent: 'Un email de réinitialisation a été envoyé. Vérifie ta boîte mail.',
+    auth_invalidCreds: 'Email ou mot de passe incorrect.',
   },
 
   en: {
@@ -197,5 +214,22 @@ export const translations = {
     coach_limitPlaceholder: 'Limit reached for today...',
     coach_limitTitle: 'Daily limit reached',
     coach_limitSub: 'You\'ve used your 20 messages for today. Come back tomorrow! 🌙',
+
+    // ── Auth ──
+    auth_taglineLogin: 'Take back control, with confidence.',
+    auth_taglineRegister: 'Create your personal space',
+    auth_login: 'Sign in', auth_register: 'Create an account', auth_forgot: 'Forgot password',
+    auth_email: 'Email', auth_password: 'Password', auth_passwordMin: 'At least 6 characters',
+    auth_forgotQ: 'Forgot your password?',
+    auth_signin: 'Sign in', auth_createAccount: 'Create my account', auth_sendReset: 'Send reset link',
+    auth_backToLogin: '← Back to sign in',
+    auth_noAccount: 'No account yet? Sign up',
+    auth_haveAccount: 'Already have an account? Sign in',
+    auth_legalPre: 'By signing up, you agree to our', auth_terms: 'terms of use',
+    auth_and: 'and our', auth_privacy: 'privacy policy',
+    auth_adults: 'This app is for adults only (18+).',
+    auth_regCheckEmail: 'Check your email to confirm your account.',
+    auth_resetSent: 'A reset email has been sent. Check your inbox.',
+    auth_invalidCreds: 'Incorrect email or password.',
   },
 }
