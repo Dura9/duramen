@@ -49,7 +49,7 @@ function Row({ icon, label, value, onClick, danger, last }) {
 export default function Account() {
   const { user, profile, refreshProfile } = useAuth()
   const { dark, toggle: toggleTheme } = useTheme()
-  const { lang, setLang } = useLang()
+  const { lang, setLang, t } = useLang()
   const navigate = useNavigate()
 
   const [modal, setModal] = useState(null) // 'email' | 'password' | 'name' | null
@@ -68,41 +68,41 @@ export default function Account() {
     setLoading(true); setError(null); setSuccess(null)
 
     if (modal === 'name') {
-      if (!value1.trim()) { setError('Entre un prénom.'); setLoading(false); return }
+      if (!value1.trim()) { setError(t('acc_enterFirstName')); setLoading(false); return }
       const { error } = await supabase.from('profiles').update({ first_name: value1.trim() }).eq('id', user.id)
       if (error) setError(error.message)
-      else { await refreshProfile(); setSuccess('Prénom mis à jour !'); setTimeout(() => setModal(null), 1200) }
+      else { await refreshProfile(); setSuccess(t('acc_firstNameUpdated')); setTimeout(() => setModal(null), 1200) }
     }
 
     if (modal === 'email') {
-      if (!value1.includes('@')) { setError('Email invalide.'); setLoading(false); return }
+      if (!value1.includes('@')) { setError(t('acc_invalidEmail')); setLoading(false); return }
       const { error } = await supabase.auth.updateUser({ email: value1 })
       if (error) setError(error.message)
-      else setSuccess('Un email de confirmation a été envoyé à la nouvelle adresse.')
+      else setSuccess(t('acc_emailConfirmSent'))
     }
 
     if (modal === 'password') {
-      if (value1.length < 6) { setError('Minimum 6 caractères.'); setLoading(false); return }
-      if (value1 !== value2) { setError('Les mots de passe ne correspondent pas.'); setLoading(false); return }
+      if (value1.length < 6) { setError(t('acc_passwordMin')); setLoading(false); return }
+      if (value1 !== value2) { setError(t('acc_passwordMismatch')); setLoading(false); return }
       const { error } = await supabase.auth.updateUser({ password: value1 })
       if (error) setError(error.message)
-      else { setSuccess('Mot de passe modifié !'); setTimeout(() => setModal(null), 1200) }
+      else { setSuccess(t('acc_passwordUpdated')); setTimeout(() => setModal(null), 1200) }
     }
 
     setLoading(false)
   }
 
   async function handleDeleteAccount() {
-    if (!confirm('⚠️ Supprimer définitivement ton compte ? Cette action est irréversible.')) return
-    if (!confirm('Dernière confirmation — toutes tes données seront effacées.')) return
+    if (!confirm(t('acc_deleteConfirm1'))) return
+    if (!confirm(t('acc_deleteConfirm2'))) return
     await supabase.from('profiles').delete().eq('id', user.id)
     await supabase.auth.signOut()
   }
 
   const modalConfig = {
-    name:     { title: 'Changer le prénom',        label: 'Nouveau prénom',         placeholder: profile?.first_name || 'Ton prénom', type: 'text',     second: false },
-    email:    { title: 'Changer l\'email',          label: 'Nouvel email',           placeholder: user?.email || '',                    type: 'email',    second: false },
-    password: { title: 'Changer le mot de passe',  label: 'Nouveau mot de passe',   placeholder: 'Minimum 6 caractères',               type: 'password', second: true  },
+    name:     { title: t('acc_changeFirstName'), label: t('acc_newFirstName'),  placeholder: profile?.first_name || t('acc_yourFirstName'), type: 'text',     second: false },
+    email:    { title: t('acc_changeEmail'),     label: t('acc_newEmail'),      placeholder: user?.email || '',                            type: 'email',    second: false },
+    password: { title: t('acc_changePassword'),  label: t('acc_newPassword'),   placeholder: t('acc_passwordMin'),                         type: 'password', second: true  },
   }
   const cfg = modal ? modalConfig[modal] : null
 
@@ -123,7 +123,7 @@ export default function Account() {
             👤
           </div>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', fontWeight: 500 }}>{profile?.first_name || 'Mon compte'}</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', fontWeight: 500 }}>{profile?.first_name || t('acc_myAccount')}</h1>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2 }}>{user?.email}</div>
           </div>
         </div>
@@ -132,23 +132,23 @@ export default function Account() {
       <div style={{ padding: '0 20px' }}>
 
         {/* ── PROFIL ───────────────────────────────────────────────────── */}
-        <Section title="Profil">
-          <Row icon="✏️" label="Prénom"       value={profile?.first_name} onClick={() => openModal('name')} />
-          <Row icon="📧" label="Email"         value={user?.email}         onClick={() => openModal('email')} />
-          <Row icon="🔒" label="Mot de passe" value="••••••••"             onClick={() => openModal('password')} last />
+        <Section title={t('acc_profile')}>
+          <Row icon="✏️" label={t('acc_firstName')} value={profile?.first_name} onClick={() => openModal('name')} />
+          <Row icon="📧" label={t('acc_email')}      value={user?.email}         onClick={() => openModal('email')} />
+          <Row icon="🔒" label={t('acc_password')}   value="••••••••"            onClick={() => openModal('password')} last />
         </Section>
 
         {/* ── NOTIFICATIONS ────────────────────────────────────────────── */}
-        <Section title="Notifications">
+        <Section title={t('acc_notifications')}>
           <button
             onClick={async () => {
               if (typeof Notification === 'undefined') {
-                alert('Ton appareil ne supporte pas les notifications dans ce navigateur. Sur iPhone, ajoute d\'abord l\'app à ton écran d\'accueil.')
+                alert(t('acc_notifUnsupported'))
                 return
               }
               localStorage.removeItem('duramen_push_dismissed')
               if (Notification.permission === 'denied') {
-                alert('Les notifications sont bloquées dans ton navigateur. Va dans les réglages de ton navigateur pour les autoriser pour ce site.')
+                alert(t('acc_notifDenied'))
                 return
               }
               window.location.reload()
@@ -157,9 +157,9 @@ export default function Account() {
           >
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🔔</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Rappel quotidien</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{t('acc_dailyReminder')}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {typeof Notification !== 'undefined' && Notification.permission === 'granted' ? 'Notifications activées ✓' : 'Appuie pour activer'}
+                {typeof Notification !== 'undefined' && Notification.permission === 'granted' ? t('acc_notifOn') : t('acc_notifTap')}
               </div>
             </div>
             <i className="ti ti-chevron-right" style={{ color: 'var(--text-muted)', fontSize: 16 }}></i>
@@ -167,7 +167,7 @@ export default function Account() {
         </Section>
 
         {/* ── PRÉFÉRENCES ──────────────────────────────────────────────── */}
-        <Section title="Préférences">
+        <Section title={t('acc_preferences')}>
           <button
             onClick={toggleTheme}
             style={{
@@ -179,8 +179,8 @@ export default function Account() {
               {dark ? '☀️' : '🌙'}
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Apparence</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{dark ? 'Mode sombre activé' : 'Mode clair activé'}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{t('acc_appearance')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{dark ? t('acc_darkOn') : t('acc_lightOn')}</div>
             </div>
             <div style={{
               width: 44, height: 26, borderRadius: 13,
@@ -199,7 +199,7 @@ export default function Account() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderTop: '1px solid var(--border)' }}>
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🌍</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{lang === 'fr' ? 'Langue' : 'Language'}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{t('acc_language')}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{lang === 'fr' ? 'Français' : 'English'}</div>
             </div>
             <div style={{ display: 'flex', gap: 4, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 20, padding: 3, flexShrink: 0 }}>
@@ -221,21 +221,21 @@ export default function Account() {
         <FeedbackCard />
 
         {/* ── COMPTE ───────────────────────────────────────────────────── */}
-        <Section title="Compte">
+        <Section title={t('acc_account')}>
           <Row
-            icon="🚪" label="Se déconnecter"
-            onClick={() => { if (confirm('Es-tu sûr de vouloir te déconnecter ?')) supabase.auth.signOut() }}
+            icon="🚪" label={t('acc_logout')}
+            onClick={() => { if (confirm(t('acc_logoutConfirm'))) supabase.auth.signOut() }}
           />
-          <Row icon="🗑️" label="Supprimer mon compte" value="Action irréversible" onClick={handleDeleteAccount} danger last />
+          <Row icon="🗑️" label={t('acc_deleteAccount')} value={t('acc_irreversible')} onClick={handleDeleteAccount} danger last />
         </Section>
 
         {/* ── INFOS ────────────────────────────────────────────────────── */}
         <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-            Duramen v1.0 · Application réservée aux +18 ans<br/>
-            <span onClick={() => navigate('/legal/cgu')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Conditions d'utilisation</span>
+            Duramen v1.0 · {t('acc_footer')}<br/>
+            <span onClick={() => navigate('/legal/cgu')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{t('acc_terms')}</span>
             {' · '}
-            <span onClick={() => navigate('/legal/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>Politique de confidentialité</span>
+            <span onClick={() => navigate('/legal/confidentialite')} style={{ textDecoration: 'underline', cursor: 'pointer' }}>{t('acc_privacy')}</span>
           </div>
         </div>
 
@@ -264,7 +264,7 @@ export default function Account() {
               </div>
               {cfg.second && (
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>Confirmer le mot de passe</label>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>{t('acc_confirmPassword')}</label>
                   <input
                     type="password" value={value2} onChange={e => setValue2(e.target.value)}
                     placeholder="••••••••"
@@ -277,7 +277,7 @@ export default function Account() {
               {success && <div style={{ background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 10, padding: '10px 14px', fontSize: 13 }}>✓ {success}</div>}
 
               <button className="btn-primary" onClick={handleSave} disabled={loading} style={{ marginTop: 4 }}>
-                {loading ? <span className="spinner"></span> : 'Enregistrer'}
+                {loading ? <span className="spinner"></span> : t('acc_save')}
               </button>
             </div>
           </div>
