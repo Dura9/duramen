@@ -9,6 +9,7 @@ import { track } from '../lib/analytics'
 
 // ── MODAL EXERCICE ────────────────────────────────────────────────────────────
 function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
+  const { t } = useLang()
   const [stepIndex, setStepIndex] = useState(-1)
   const [timer, setTimer] = useState(0)
   const [running, setRunning] = useState(false)
@@ -85,7 +86,7 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
               ))}
             </div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'right' }}>
-              Étape {stepIndex + 1} / {exercise.steps.length}
+              {t('ex_step')} {stepIndex + 1} / {exercise.steps.length}
             </div>
           </div>
         )}
@@ -98,10 +99,10 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
               <p style={{ fontSize: 13, color: exercise.color, lineHeight: 1.6 }}>{exercise.note}</p>
             </div>
             <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.6 }}>
-              {exercise.steps.length} étapes · Installe-toi dans un endroit calme avant de commencer.
+              {exercise.steps.length} {t('ex_steps')} · {t('ex_settle')}
             </p>
             <button className="btn-primary btn-ripple" onClick={startExercise} style={{ background: exercise.color }}>
-              Commencer l'exercice →
+              {t('ex_start')}
             </button>
           </div>
         )}
@@ -133,7 +134,7 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
               </p>
             </div>
             <button className="btn-primary btn-ripple" onClick={nextStep} style={{ background: exercise.color }}>
-              {stepIndex === exercise.steps.length - 1 ? 'Terminer l\'exercice ✓' : 'Étape suivante →'}
+              {stepIndex === exercise.steps.length - 1 ? t('ex_finish') : t('ex_nextStep')}
             </button>
           </div>
         )}
@@ -142,17 +143,17 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
         {done && (
           <div className="fade-in" style={{ textAlign: 'center', padding: '20px 0' }}>
             <div className="bounce-in" style={{ fontSize: 64, marginBottom: 12 }}>🎉</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)', marginBottom: 6 }}>Excellent travail !</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, color: 'var(--text)', marginBottom: 6 }}>{t('ex_greatWork')}</div>
             <div className="bounce-in" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--primary-light)', color: 'var(--primary)', borderRadius: 20, padding: '6px 16px', fontSize: 14, fontWeight: 600, marginBottom: 28, animationDelay: '0.15s' }}>
-              ⭐ +{exercise.xp} XP gagnés
+              ⭐ +{exercise.xp} {t('ex_xpEarned')}
             </div>
             <div style={{ marginBottom: 8 }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', marginBottom: 16 }}>Comment tu te sens après cet exercice ?</div>
+              <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', marginBottom: 16 }}>{t('ex_howFeel')}</div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
                 {[
-                  { emoji: '😐', label: 'Neutre' },
-                  { emoji: '😊', label: 'Bien' },
-                  { emoji: '😄', label: 'Super' },
+                  { emoji: '😐', label: t('ex_moodNeutral') },
+                  { emoji: '😊', label: t('ex_moodGood') },
+                  { emoji: '😄', label: t('ex_moodGreat') },
                 ].map(m => (
                   <button key={m.emoji} onClick={() => handleMood(m.emoji)}
                     style={{
@@ -171,13 +172,13 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
               {mood && (
                 <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <button className="btn-primary btn-ripple" onClick={() => onComplete(mood)}>
-                    Terminer ✓
+                    {t('ex_finishShort')}
                   </button>
                   <button
                     onClick={() => onDebrief(mood)}
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-card)', border: '1.5px solid var(--primary)', color: 'var(--primary)', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
                   >
-                    💬 En parler avec Alex
+                    {t('ex_talkAlex')}
                   </button>
                 </div>
               )}
@@ -192,7 +193,7 @@ function ExerciseModal({ exercise, onClose, onComplete, onDebrief }) {
 // ── PAGE EXERCICES ────────────────────────────────────────────────────────────
 export default function Exercises() {
   const { user, profile, refreshProfile } = useAuth()
-  const { lang } = useLang()
+  const { lang, t } = useLang()
   const navigate = useNavigate()
   const [activeExercise, setActiveExercise] = useState(null)
   const [phaseUnlocked, setPhaseUnlocked] = useState(null)
@@ -264,8 +265,8 @@ export default function Exercises() {
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>Profil : {program.label}</div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, marginBottom: 4 }}>Mon programme</h1>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', marginBottom: 4 }}>{t('ex_profile')} {program.label}</div>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: '#fff', fontWeight: 500, marginBottom: 4 }}>{t('ex_myProgram')}</h1>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', marginBottom: 16 }}>{program.approach} · {program.duration}</div>
 
         {/* Phases indicator */}
@@ -279,7 +280,7 @@ export default function Exercises() {
             }}>
               <div style={{ fontSize: 14 }}>{ph.n < currentPhase ? '✓' : ph.emoji}</div>
               <div style={{ fontSize: 10, color: ph.n <= currentPhase ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)', fontWeight: ph.n === currentPhase ? 700 : 400, marginTop: 2 }}>
-                Phase {ph.n}
+                {t('ex_phase')} {ph.n}
               </div>
             </div>
           ))}
@@ -300,13 +301,13 @@ export default function Exercises() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 18 }}>{ph.emoji}</span>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: isLocked ? 'var(--text-muted)' : 'var(--text)' }}>Phase {ph.n} — {ph.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: isLocked ? 'var(--text-muted)' : 'var(--text)' }}>{t('ex_phase')} {ph.n} — {ph.title}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{ph.focus}</div>
                   </div>
                 </div>
                 {isLocked  && <span style={{ fontSize: 11, background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '3px 10px', borderRadius: 20, flexShrink: 0 }}>🔒</span>}
-                {isDone    && <span style={{ fontSize: 11, background: 'var(--primary-light)', color: 'var(--primary)', padding: '3px 10px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>✓ Terminé</span>}
-                {isCurrent && <span style={{ fontSize: 11, background: '#fdf6e3', color: '#7a5c00', border: '1px solid #e8c97a', padding: '3px 10px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>En cours</span>}
+                {isDone    && <span style={{ fontSize: 11, background: 'var(--primary-light)', color: 'var(--primary)', padding: '3px 10px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>{t('ex_done')}</span>}
+                {isCurrent && <span style={{ fontSize: 11, background: '#fdf6e3', color: '#7a5c00', border: '1px solid #e8c97a', padding: '3px 10px', borderRadius: 20, fontWeight: 600, flexShrink: 0 }}>{t('ex_inProgress')}</span>}
               </div>
 
               {/* Cartes exercices */}
@@ -341,7 +342,7 @@ export default function Exercises() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
                       <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 8px', borderRadius: 20, background: ex.color + '22', color: ex.color }}>
-                        Phase {ex.phase}
+                        {t('ex_phase')} {ex.phase}
                       </span>
                       <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{ex.xp} XP</span>
                     </div>
@@ -364,11 +365,11 @@ export default function Exercises() {
           animation: 'fadeIn 0.3s ease',
         }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🎉</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 4 }}>Phase {phaseUnlocked} débloquée !</div>
-          <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 16 }}>De nouveaux exercices sont disponibles.</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginBottom: 4 }}>{t('ex_phase')} {phaseUnlocked} {t('ex_unlockedSuffix')}</div>
+          <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 16 }}>{t('ex_newAvailable')}</div>
           <button onClick={() => setPhaseUnlocked(null)}
             style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', borderRadius: 10, padding: '8px 20px', fontSize: 14, cursor: 'pointer', fontWeight: 500 }}>
-            Super ! 🙌
+            {t('ex_awesome')}
           </button>
         </div>
       )}
