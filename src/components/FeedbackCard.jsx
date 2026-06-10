@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useLang } from '../i18n/LanguageContext'
 import { track } from '../lib/analytics'
 
 export default function FeedbackCard() {
   const { user } = useAuth()
+  const { t } = useLang()
   const [open, setOpen] = useState(false)
   const [rating, setRating] = useState(null)
   const [text, setText] = useState('')
@@ -32,7 +34,7 @@ export default function FeedbackCard() {
     <>
       {/* Row dans la page Compte */}
       <div style={{ marginBottom: 24 }}>
-        <div className="section-label" style={{ marginBottom: 10 }}>Ton avis compte</div>
+        <div className="section-label" style={{ marginBottom: 10 }}>{t('fb_sectionLabel')}</div>
         <button
           onClick={() => setOpen(true)}
           style={{
@@ -43,8 +45,8 @@ export default function FeedbackCard() {
         >
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>💬</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>Donner mon avis</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>Aide-nous à améliorer Duramen</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{t('fb_give')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('fb_help')}</div>
           </div>
           <i className="ti ti-chevron-right" style={{ color: 'var(--text-muted)', fontSize: 16 }}></i>
         </button>
@@ -59,17 +61,17 @@ export default function FeedbackCard() {
             {sent ? (
               <div style={{ textAlign: 'center', padding: '20px 0' }}>
                 <div style={{ fontSize: 48, marginBottom: 10 }}>🙏</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', marginBottom: 6 }}>Merci !</div>
-                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>Ton retour nous aide vraiment à progresser.</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--text)', marginBottom: 6 }}>{t('fb_thanks')}</div>
+                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>{t('fb_thanksSub')}</div>
               </div>
             ) : (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                  <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>Ton avis sur Duramen</h2>
+                  <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('fb_title')}</h2>
                   <button onClick={() => setOpen(false)} style={{ color: 'var(--text-muted)', fontSize: 22 }}><i className="ti ti-x"></i></button>
                 </div>
 
-                <div style={{ fontSize: 14, color: 'var(--text)', marginBottom: 12 }}>Comment trouves-tu l'application ?</div>
+                <div style={{ fontSize: 14, color: 'var(--text)', marginBottom: 12 }}>{t('fb_question')}</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 20 }}>
                   {[
                     { v: 1, e: '😞' }, { v: 2, e: '😕' }, { v: 3, e: '😐' }, { v: 4, e: '😊' }, { v: 5, e: '😍' },
@@ -89,13 +91,13 @@ export default function FeedbackCard() {
                 <textarea
                   value={text}
                   onChange={e => setText(e.target.value)}
-                  placeholder="Qu'est-ce qui te plaît ? Qu'est-ce qui te manque ou te bloque ? (facultatif)"
+                  placeholder={t('fb_placeholder')}
                   rows={4}
                   style={{ width: '100%', padding: '14px', borderRadius: 14, border: '1.5px solid var(--border)', fontSize: 14, background: 'var(--bg-card)', color: 'var(--text)', outline: 'none', resize: 'none', boxSizing: 'border-box', marginBottom: 16, fontFamily: 'var(--font-body)' }}
                 />
 
                 <button className="btn-primary" onClick={submit} disabled={loading || (!rating && !text.trim())}>
-                  {loading ? <span className="spinner"></span> : 'Envoyer mon avis'}
+                  {loading ? <span className="spinner"></span> : t('fb_send')}
                 </button>
               </>
             )}

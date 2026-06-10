@@ -141,6 +141,13 @@ export const translations = {
     acc_enterFirstName: 'Entre un prénom.', acc_firstNameUpdated: 'Prénom mis à jour !',
     acc_invalidEmail: 'Email invalide.', acc_emailConfirmSent: 'Un email de confirmation a été envoyé à la nouvelle adresse.',
     acc_passwordMismatch: 'Les mots de passe ne correspondent pas.', acc_passwordUpdated: 'Mot de passe modifié !',
+
+    // ── Feedback ──
+    fb_sectionLabel: 'Ton avis compte', fb_give: 'Donner mon avis', fb_help: 'Aide-nous à améliorer Duramen',
+    fb_thanks: 'Merci !', fb_thanksSub: 'Ton retour nous aide vraiment à progresser.',
+    fb_title: 'Ton avis sur Duramen', fb_question: 'Comment trouves-tu l\'application ?',
+    fb_placeholder: 'Qu\'est-ce qui te plaît ? Qu\'est-ce qui te manque ou te bloque ? (facultatif)',
+    fb_send: 'Envoyer mon avis',
   },
 
   en: {
@@ -279,5 +286,12 @@ export const translations = {
     acc_enterFirstName: 'Enter a first name.', acc_firstNameUpdated: 'First name updated!',
     acc_invalidEmail: 'Invalid email.', acc_emailConfirmSent: 'A confirmation email has been sent to the new address.',
     acc_passwordMismatch: 'Passwords don\'t match.', acc_passwordUpdated: 'Password updated!',
+
+    // ── Feedback ──
+    fb_sectionLabel: 'Your feedback matters', fb_give: 'Give feedback', fb_help: 'Help us improve Duramen',
+    fb_thanks: 'Thank you!', fb_thanksSub: 'Your feedback really helps us improve.',
+    fb_title: 'Your feedback on Duramen', fb_question: 'How do you find the app?',
+    fb_placeholder: 'What do you like? What\'s missing or blocking you? (optional)',
+    fb_send: 'Send my feedback',
   },
 }
