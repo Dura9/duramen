@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts'
 import { getProgram } from '../data/programs'
 import { useLang } from '../i18n/LanguageContext'
+import ProgressTracker from '../components/ProgressTracker'
 
 const BADGES = [
   { id: 'first_session', icon: '🌱', condition: (s, p) => s.length >= 1 },
@@ -135,6 +136,9 @@ export default function Progress() {
             </div>
           ))}
         </div>
+
+        {/* ── MESURE DE PROGRESSION ────────────────────────────────────── */}
+        <ProgressTracker />
 
         {/* ── NIVEAU XP ────────────────────────────────────────────────── */}
         <div className="card" style={{ marginBottom: 20 }}>

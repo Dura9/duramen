@@ -160,6 +160,18 @@ export const translations = {
     push_desc: 'Reçois une notification chaque matin pour ne jamais manquer ta séance.',
     push_enable: 'Activer', push_later: 'Plus tard',
     push_doneTitle: 'Notifications activées !', push_doneSub: 'Tu recevras un rappel quotidien à 8h.',
+
+    // ── Mesure de progression ──
+    pt2_title: 'Ma progression',
+    pt2_checkinCard: 'Mesure ta progression', pt2_checkinSub: 'Un point rapide pour voir tes résultats',
+    pt2_checkinBtn: 'Faire le point',
+    pt2_q1: 'En moyenne, combien de temps tiens-tu en ce moment ?',
+    pt2_q2: 'Comment évalues-tu ton contrôle aujourd\'hui ?',
+    pt2_q2sub: '1 = aucun contrôle · 10 = contrôle parfait',
+    pt2_chartTitle: 'Ton contrôle dans le temps', pt2_improved: 'En progression 📈',
+    pt2_needMore: 'Refais un point dans quelques jours pour voir ta courbe de progression.',
+    pt2_savedTitle: 'Bien joué !', pt2_savedSub: 'Ta progression est enregistrée. Continue comme ça !',
+    pt2_firstTime: 'Premier point enregistré ! Reviens dans quelques jours pour mesurer ton évolution.',
   },
 
   en: {
@@ -317,5 +329,17 @@ export const translations = {
     push_desc: 'Get a notification every morning so you never miss your session.',
     push_enable: 'Enable', push_later: 'Later',
     push_doneTitle: 'Notifications enabled!', push_doneSub: 'You\'ll get a daily reminder at 8am.',
+
+    // ── Progress tracking ──
+    pt2_title: 'My progress',
+    pt2_checkinCard: 'Track your progress', pt2_checkinSub: 'A quick check-in to see your results',
+    pt2_checkinBtn: 'Check in',
+    pt2_q1: 'On average, how long do you last right now?',
+    pt2_q2: 'How do you rate your control today?',
+    pt2_q2sub: '1 = no control · 10 = perfect control',
+    pt2_chartTitle: 'Your control over time', pt2_improved: 'Improving 📈',
+    pt2_needMore: 'Check in again in a few days to see your progress curve.',
+    pt2_savedTitle: 'Well done!', pt2_savedSub: 'Your progress is saved. Keep it up!',
+    pt2_firstTime: 'First check-in saved! Come back in a few days to track your progress.',
   },
 }

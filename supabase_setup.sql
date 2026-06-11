@@ -105,3 +105,17 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Anyone can insert feedback" ON feedback FOR INSERT WITH CHECK (true);
+
+-- =============================================
+-- MESURE DE PROGRESSION (check-ins durée + contrôle)
+-- =============================================
+CREATE TABLE IF NOT EXISTS progress_checkins (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  duration_score INTEGER,
+  control_score INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE progress_checkins ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users view own checkins" ON progress_checkins FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users insert own checkins" ON progress_checkins FOR INSERT WITH CHECK (auth.uid() = user_id);
