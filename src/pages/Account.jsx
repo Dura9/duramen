@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { isPushEnabled, enablePush, disablePush, pushSupported } from '../lib/push'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 import { useLang } from '../i18n/LanguageContext'
@@ -58,6 +59,24 @@ export default function Account() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(null)
   const [error, setError]     = useState(null)
+  const [notifOn, setNotifOn]   = useState(false)
+  const [notifBusy, setNotifBusy] = useState(false)
+
+  useEffect(() => { isPushEnabled().then(setNotifOn) }, [])
+
+  async function toggleNotif() {
+    if (notifBusy) return
+    if (!pushSupported()) { alert(t('acc_notifUnsupported')); return }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') { alert(t('acc_notifDenied')); return }
+    setNotifBusy(true)
+    try {
+      if (notifOn) { await disablePush(user.id); setNotifOn(false) }
+      else { await enablePush(user.id); setNotifOn(true) }
+    } catch (e) {
+      if (e.message === 'denied') alert(t('acc_notifDenied'))
+    }
+    setNotifBusy(false)
+  }
 
   function openModal(type) {
     setModal(type)
@@ -141,28 +160,19 @@ export default function Account() {
         {/* ── NOTIFICATIONS ────────────────────────────────────────────── */}
         <Section title={t('acc_notifications')}>
           <button
-            onClick={async () => {
-              if (typeof Notification === 'undefined') {
-                alert(t('acc_notifUnsupported'))
-                return
-              }
-              localStorage.removeItem('duramen_push_dismissed')
-              if (Notification.permission === 'denied') {
-                alert(t('acc_notifDenied'))
-                return
-              }
-              window.location.reload()
-            }}
+            onClick={toggleNotif}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'transparent', cursor: 'pointer', textAlign: 'left' }}
           >
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, flexShrink: 0 }}>🔔</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text)' }}>{t('acc_dailyReminder')}</div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {typeof Notification !== 'undefined' && Notification.permission === 'granted' ? t('acc_notifOn') : t('acc_notifTap')}
+                {notifBusy ? '…' : notifOn ? t('acc_notifOn') : t('acc_notifTap')}
               </div>
             </div>
-            <i className="ti ti-chevron-right" style={{ color: 'var(--text-muted)', fontSize: 16 }}></i>
+            <div style={{ width: 44, height: 26, borderRadius: 13, background: notifOn ? 'var(--primary)' : 'var(--border)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+              <div style={{ position: 'absolute', top: 3, left: notifOn ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+            </div>
           </button>
         </Section>
 

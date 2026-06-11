@@ -58,13 +58,13 @@ function getCoaching(profile) {
   return PROFILE_COACHING[profile?.profile_type] || PROFILE_COACHING.cognitive
 }
 
-function buildSystemPrompt(profile) {
+function buildSystemPrompt(profile, lang) {
   const coaching = getCoaching(profile)
-  const program = getProgram(profile.profile_type, profile.language)
+  const program = getProgram(profile.profile_type, lang)
   const phaseCount = program.phases.length
   const currentPhase = Math.min(Math.max(profile.program_phase || 1, 1), phaseCount)
   const phaseInfo = program.phases.find(p => p.n === currentPhase)
-  const phaseExercises = getPhaseExercises(program, currentPhase, profile.language).map(e => e.title).join(', ')
+  const phaseExercises = getPhaseExercises(program, currentPhase, lang).map(e => e.title).join(', ')
 
   return `Tu es Alex, le coach personnel de l'application Duramen, spécialisé en bien-être sexuel masculin. Tu accompagnes les hommes qui souhaitent mieux gérer l'éjaculation précoce (EP), avec la posture d'un sexologue clinicien formé aux thérapies cognitivo-comportementales (TCC), doublée de la chaleur d'un véritable allié.
 
@@ -72,7 +72,7 @@ function buildSystemPrompt(profile) {
 Tu n'es pas un simple chatbot d'informations. Tu es un ACCOMPAGNANT. Ta mission profonde : créer une alliance de confiance, déculpabiliser, et soutenir la personne jour après jour pour qu'elle aille au bout de son programme. Dans le traitement de l'EP, le vrai défi n'est pas le manque de techniques — c'est l'abandon. Ton rôle est de faire en sorte que ${profile.first_name} ne se sente jamais seul et ait toujours envie de continuer.
 
 ═══ CONTEXTE DE ${profile.first_name?.toUpperCase()} ═══
-- Profil diagnostiqué : ${coaching.name[profile.language] || coaching.name.fr}
+- Profil diagnostiqué : ${coaching.name[lang] || coaching.name.fr}
 - Approche thérapeutique : ${program.approach}
 - Phase actuelle : Phase ${currentPhase}/${phaseCount} — ${phaseInfo?.title} (objectif : ${phaseInfo?.focus})
 - Exercices de sa phase en cours : ${phaseExercises}
@@ -101,7 +101,7 @@ ${coaching.focus}
 - 3 à 5 phrases maximum, claires et directes
 - Pour un exercice : étapes structurées avec durées
 - Ne commence jamais par "Bien sûr !", "Absolument !" ou tout marqueur artificiel
-- Réponds en ${profile.language === 'en' ? 'anglais' : 'français'} uniquement
+- Réponds en ${lang === 'en' ? 'anglais' : 'français'} uniquement, quelle que soit la langue du message reçu
 
 ═══ CE QUE TU NE FAIS PAS ═══
 - Pas de diagnostic médical, pas de prescription de médicaments
@@ -194,7 +194,7 @@ export default function Coach() {
         body: JSON.stringify({
           model: 'anthropic/claude-3.5-haiku',
           messages: [
-            { role: 'system', content: buildSystemPrompt(profile) },
+            { role: 'system', content: buildSystemPrompt(profile, lang) },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
           ],
           max_tokens: 600,
