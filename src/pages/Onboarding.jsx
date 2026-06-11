@@ -65,7 +65,8 @@ const OB = {
     urgency: 'Plus tôt tu commences, plus tôt tu redeviendras maître de ton éjaculation.\nTon programme personnalisé est prêt.',
     ctaLoggedIn: 'Commencer mon programme →',
     ctaNew: 'Créer mon compte gratuit →',
-    guarantee: '✓ Gratuit pour commencer · ✓ Sans carte bancaire · ✓ Résultats en 4 semaines',
+    guarantee: '✓ Gratuit pour commencer · ✓ Sans carte bancaire · ✓ Premiers résultats dès 4 à 6 semaines',
+    method: 'Méthode fondée sur des techniques reconnues en sexologie : stop-start, Kegel, pleine conscience et TCC.',
     profileLabels: {
       sensory: 'Hyperexcité Sensoriel', cognitive: 'Anxieux de Performance', situational: 'EP Situationnelle',
       conditioned: 'EP Conditionnée', primary: 'EP Primaire',
@@ -149,7 +150,8 @@ const OB = {
     urgency: 'The sooner you start, the sooner you\'ll be in control again.\nYour personalized program is ready.',
     ctaLoggedIn: 'Start my program →',
     ctaNew: 'Create my free account →',
-    guarantee: '✓ Free to start · ✓ No credit card · ✓ Results in 4 weeks',
+    guarantee: '✓ Free to start · ✓ No credit card · ✓ First results from 4 to 6 weeks',
+    method: 'Method based on recognized sexology techniques: stop-start, Kegel, mindfulness and CBT.',
     profileLabels: {
       sensory: 'Sensory Hyperarousal', cognitive: 'Performance Anxiety', situational: 'Situational PE',
       conditioned: 'Conditioned PE', primary: 'Primary PE',
@@ -343,6 +345,12 @@ export default function Onboarding() {
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '14px 18px', marginBottom: 16 }}>
           <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.7, fontStyle: 'italic', marginBottom: 6 }}>"{testimonial.text}"</p>
           <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>— {testimonial.author}</p>
+        </div>
+
+        {/* Crédibilité méthode (rassure + convertit) */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, background: 'var(--primary-light)', borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
+          <span style={{ fontSize: 15, flexShrink: 0 }}>🔬</span>
+          <p style={{ fontSize: 12.5, color: 'var(--primary)', lineHeight: 1.5, fontWeight: 500 }}>{c.method}</p>
         </div>
 
         <p style={{ fontSize: 14, color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center', lineHeight: 1.7, marginBottom: 24, whiteSpace: 'pre-line' }}>
