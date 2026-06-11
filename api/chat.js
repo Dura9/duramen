@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.OPENROUTER_KEY}`,
-        'HTTP-Referer': 'https://duramen.vercel.app',
+        'HTTP-Referer': 'https://duramen.app',
         'X-Title': 'Duramen',
       },
       body: JSON.stringify({

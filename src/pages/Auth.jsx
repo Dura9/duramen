@@ -25,7 +25,7 @@ export default function Auth() {
       else setMessage(t('auth_regCheckEmail'))
     } else if (mode === 'forgot') {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://duramen.vercel.app',
+        redirectTo: 'https://duramen.app',
       })
       if (error) setError(error.message)
       else setMessage(t('auth_resetSent'))

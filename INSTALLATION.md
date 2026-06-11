@@ -55,7 +55,7 @@ VITE_OPENROUTER_KEY=sk-or-v1-VOTRE-CLE...
    - **Name** : `VITE_SUPABASE_ANON_KEY` → **Value** : votre clé anon
    - **Name** : `VITE_OPENROUTER_KEY` → **Value** : votre clé OpenRouter
 7. Cliquez **Deploy**
-8. Attendez 2 minutes → Vercel vous donne un lien **duramen.vercel.app** ✅
+8. Attendez 2 minutes → Vercel vous donne un lien **duramen.app** ✅
 
 ---
 
@@ -63,8 +63,8 @@ VITE_OPENROUTER_KEY=sk-or-v1-VOTRE-CLE...
 
 1. Retournez sur **supabase.com** → votre projet
 2. Dans le menu gauche : **Authentication** → **URL Configuration**
-3. Dans **Site URL**, entrez votre URL Vercel : `https://duramen.vercel.app`
-4. Dans **Redirect URLs**, ajoutez : `https://duramen.vercel.app/**`
+3. Dans **Site URL**, entrez votre URL Vercel : `https://duramen.app`
+4. Dans **Redirect URLs**, ajoutez : `https://duramen.app/**`
 5. Cliquez **Save**
 
 ---
