@@ -18,6 +18,8 @@ function getAnonId() {
 
 // Envoie un événement. Ne bloque jamais l'UI, n'émet aucune erreur visible.
 export async function track(event, props = {}) {
+  // Mode "sans traçage" : appareils de l'admin (active via /?notrack=1)
+  if (typeof localStorage !== 'undefined' && localStorage.getItem('duramen_notrack') === '1') return
   try {
     const { data: { session } } = await supabase.auth.getSession()
     await supabase.from('events').insert({
